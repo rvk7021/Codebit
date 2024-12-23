@@ -19,7 +19,7 @@ let products = [
 ];
 
 
-app.use('/api/v1/auth',userRoutes)
+app.use('/',userRoutes)
 
 app.get('/', (req, res) => {
     res.send(products);
