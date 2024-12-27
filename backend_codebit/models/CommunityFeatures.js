@@ -9,7 +9,7 @@ const CommentSchema = new mongoose.Schema({
 
 const PostSchema = new mongoose.Schema({
   postId: { type: String, required: true, unique: true }, 
-  userId: { type: String, required: true, ref: 'User' }, 
+  userId: { type: String, required: true, ref: 'User' },
   content: { type: String, required: true }, 
   tags: { type: [String], required: false }, 
   likes: { type: Number, default: 0 }, 
