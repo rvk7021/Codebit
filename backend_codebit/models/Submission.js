@@ -1,9 +1,16 @@
 const mongoose = require('mongoose');
 
 const SubmissionSchema = new mongoose.Schema({
-  submissionId: { type: String, required: true, unique: true }, 
-  userId: { type: String, required: true, ref: 'User' }, 
-  problemId: { type: String, required: true, ref: 'Problem' }, 
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  problem: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Problem',
+    required: true
+  },
   code: { type: String, required: true }, 
   language: { type: String, required: true }, 
   status: { 
