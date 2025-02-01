@@ -5,10 +5,10 @@ require('dotenv').config();
 
 exports.signup = async (req, res) => {
   try {
-    const {userName, firstName, lastName, email, password, role } = req.body;
-    // const userId = Date.now();
+    const { firstName, lastName, email, password, role } = req.body;
+    const userId = Date.now();
 
-    if (!userName||!firstName || !lastName || !email || !password || !role) {
+    if (!firstName || !lastName || !email || !password || !role) {
       return res.status(400).json({
         success: false,
         message: "All fields required",
@@ -26,7 +26,7 @@ exports.signup = async (req, res) => {
     const hashPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      userName,
+      userId: userId,
       firstName,
       lastName,
       password: hashPassword,

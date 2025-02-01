@@ -4,7 +4,6 @@ const app = express();
 const dotenv = require('dotenv');
 
 const userRoutes=require('./routes/user');
-app.use(express.urlencoded({ extended: true }));
 
 
 const database = require("./config/database");
