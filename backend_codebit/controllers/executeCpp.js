@@ -8,22 +8,7 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-// const executeCpp = (filepath) => {
-//   const jobId = path.basename(filepath).split(".")[0];
-//   const outPath = path.join(outputPath, `${jobId}.exe`);
-//   console.log(jobId);
-  
-//   return new Promise((resolve, reject) => {
-//     exec(
-//       `g++ ${filepath} -o main ${outPath} && cd ${outputPath} && main.exe`,
-//       (error, stdout, stderr) => {
-//         error && reject({ error, stderr });
-//         stderr && reject(stderr);
-//         resolve(stdout);
-//       }
-//     );
-//   });
-// };
+
 const executeCpp = (filepath) => {
     const jobId = path.basename(filepath).split(".")[0];
     const outPath = path.join(outputPath, `${jobId}.exe`); // Change to .exe for Windows
@@ -33,11 +18,21 @@ const executeCpp = (filepath) => {
         `g++ "${filepath}" -o "${outPath}" && cd "${outputPath}" && "${jobId}.exe"`,
         (error, stdout, stderr) => {
           if (error) {
+          
             reject({ error, stderr });
           } else if (stderr) {
+         
             reject(stderr);
           } else {
+           
             resolve(stdout);
+            
+          }
+          try {
+            if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
+            if (fs.existsSync(outPath)) fs.unlinkSync(outPath);
+          } catch (cleanupError) {
+            console.error("Error cleaning up files:", cleanupError);
           }
         }
       );

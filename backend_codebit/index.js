@@ -1,11 +1,11 @@
 const express=require('express')
-
+const cors=require('cors')
 const app = express();
 const dotenv = require('dotenv');
 
 const userRoutes=require('./routes/user');
 app.use(express.urlencoded({ extended: true }));
-
+app.use(cors());
 
 const database = require("./config/database");
 
