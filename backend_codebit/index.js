@@ -1,16 +1,18 @@
 const express=require('express')
 const cors=require('cors')
 const app = express();
+const database = require('./config/database');
 const dotenv = require('dotenv');
+const cloudinary = require('./config/cloudinary');
 
+database.connect();
 const userRoutes=require('./routes/user');
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-const database = require("./config/database");
 
 
-database.connect();
+
 app.use(express.json());
 dotenv.config();
 let products = [
