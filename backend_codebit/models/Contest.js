@@ -12,5 +12,5 @@ const ContestSchema = new mongoose.Schema({
     beforeDeadline: { type: [String], default: [] }
   }
 });
-
+  
 module.exports = mongoose.model('Contest', ContestSchema);

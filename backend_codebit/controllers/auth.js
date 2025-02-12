@@ -5,13 +5,14 @@ require('dotenv').config();
 
 exports.signup = async (req, res) => {
   try {
-    const {userName, firstName, lastName, email, password, role } = req.body;
+    const {userName, firstName, lastName, email, password, role,college } = req.body;
     // const userId = Date.now();
 
-    if (!userName||!firstName || !lastName || !email || !password || !role) {
+    if (!userName||!firstName || !lastName || !email || !password || !role||!college) {
       return res.status(400).json({
         success: false,
         message: "All fields required",
+
       });
     }
 
@@ -32,6 +33,7 @@ exports.signup = async (req, res) => {
       password: hashPassword,
       email,
       role,
+      college
     });
 
     return res.status(200).json({
