@@ -1,20 +1,29 @@
 const express=require('express');
+const multer = require('multer');
+const upload = multer(); 
 const router=express.Router();
 const {addProblem,searchproblem}=require('../controllers/problem');
 const {checkProblem}=require('../middleware/problem')
 const {login,signup}=require('../controllers/auth'); 
 const { addTestCase } = require('../controllers/testCases');
-const {fetchUpcomingContest}=require('../controllers/contest');
+const {fetchUpcomingContestAPI}=require('../controllers/contest');
 const {executeCode}=require('../controllers/compiler')
+<<<<<<< HEAD
 const {Leaderboard,fetchUserDetails}=require('../controllers/leaderBoard');
 const { CheckSheet, CreateGroup, DeleteGroup, ShowAllGroups, AddProblemToGroup, RemoveProblemFromGroup } = require('../controllers/userSheet');
 // auth routes
+=======
+const {fileUpload}=require('../controllers/fileUpload')
+const {scheduleEmailTask}=require('../controllers/sendContestMail')
+const {addPost}=require('../controllers/post');
+>>>>>>> d9b0e1939a85eb09d1ecb31ba54a761f083bd87a
 router.post('/login',login);
 router.post('/signup',signup);
 // problem routes
 router.post('/problems',checkProblem,addProblem);
 router.get('/problems/search',searchproblem);
 router.post('/problems/addTest',addTestCase);
+<<<<<<< HEAD
 // contest routes
 router.post('/contest',fetchUpcomingContest);
 router.post('/execute',executeCode);
@@ -47,4 +56,11 @@ router.delete('/sheet/group/problem',RemoveProblemFromGroup);
 // // Remove a problem from a specific group in a sheet
 // router.delete('/api/sheets/:sheetId/groups/:groupId/problems/:problemId', removeProblemFromGroup);
 
+=======
+router.post('/contest',fetchUpcomingContestAPI);
+router.post('/execute',executeCode);
+router.post('/upload',upload.single('file'),fileUpload);
+router.post('/scheduleEmailTask',scheduleEmailTask);
+router.post('/posts', upload.array('media', 5), addPost);
+>>>>>>> d9b0e1939a85eb09d1ecb31ba54a761f083bd87a
 module.exports=router;
