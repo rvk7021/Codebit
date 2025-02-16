@@ -8,7 +8,7 @@ const { contestEmail } = require("../mail/template");
 const sendContestEmails = async () => {
   const users = await User.find({});
 
-  const upcomingContests = await Contest.find({});
+const upcomingContests = await Contest.find({});
 console.log("API CALLED");
 console.log(upcomingContests);
 

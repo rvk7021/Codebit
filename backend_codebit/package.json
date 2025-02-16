@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.2",
 <<<<<<< HEAD
+<<<<<<< HEAD
     "puppeteer": "^24.1.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
@@ -32,6 +33,14 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.10.0",
 >>>>>>> d9b0e1939a85eb09d1ecb31ba54a761f083bd87a
+=======
+"puppeteer": "^24.1.1",
+"puppeteer-extra": "^3.3.6",
+"puppeteer-extra-plugin-stealth": "^2.11.2",
+"multer": "^1.4.5-lts.1",
+"node-cron": "^3.0.3",
+"nodemailer": "^6.10.0",
+>>>>>>> 9b68d0a2fd09014d793097e7fd3ede947109e373
     "uuid": "^11.0.5",
     "zod": "^3.24.1"
   }
