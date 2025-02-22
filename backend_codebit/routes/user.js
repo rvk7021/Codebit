@@ -2,7 +2,7 @@ const express=require('express');
 const multer = require('multer');
 const upload = multer(); 
 const router=express.Router();
-const {addProblem,searchproblem}=require('../controllers/problem');
+const {addProblem,searchproblem,searchProblemByName}=require('../controllers/problem');
 const {checkProblem}=require('../middleware/problem')
 const {login,signup}=require('../controllers/auth'); 
 const { addTestCase } = require('../controllers/testCases');
@@ -10,6 +10,7 @@ const {fetchUpcomingContestAPI}=require('../controllers/contest');
 const {executeCode}=require('../controllers/compiler')
 const {Leaderboard}=require('../controllers/leaderBoard');
 const {auth }=require('../middleware/auth');
+const {getAllUserDetails}=require('../controllers/auth');
 const { CheckSheet, CreateGroup, DeleteGroup, ShowAllGroups, AddProblemToGroup, RemoveProblemFromGroup } = require('../controllers/userSheet');
 // auth routes
 router.post('/login',login);
@@ -30,5 +31,7 @@ router.delete('/sheet/group',DeleteGroup);
 router.get('/sheet/groups',ShowAllGroups);
 router.post('/sheet/group/problem',AddProblemToGroup);
 router.delete('/sheet/group/problem',RemoveProblemFromGroup);
+router.get('/searchProblem',searchProblemByName);
+router.get("/getUserDetails",auth,getAllUserDetails);
 
 module.exports=router;

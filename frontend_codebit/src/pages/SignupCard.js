@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
 export default function SignupCard() {
 const [formData, setFormData] = useState({
 userName: "",
@@ -13,12 +12,11 @@ college: "",
 const [error, setError] = useState(null);
 const [loading, setLoading] = useState(false);
 
-// const navigate = useNavigate();
+const navigate = useNavigate();
 
 const handleChange = (e) => {
 const { name, value } = e.target;
 
-console.log("Field updated:", name, value);
 setFormData({
 ...formData,
 [name]: value,
@@ -28,7 +26,7 @@ setFormData({
 const handleSubmit = async (e) => {
 
 e.preventDefault();
-console.log("Form Data to be submitted:", formData);
+
 try {
 setLoading(true);
 const res = await fetch(`${process.env.REACT_APP_BASE_URL}/signup`, {
@@ -46,7 +44,7 @@ return;
 }
 setLoading(false);
 setError(null);
-console.log("Response from backend:", data);
+navigate('/signin');
 
 } catch (error) {
 setLoading(false);
