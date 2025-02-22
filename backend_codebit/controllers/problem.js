@@ -1,5 +1,6 @@
 const express = require('express');
 const Problem = require('../models/Problem');
+const TestCase = require('../models/TestCases');
 const app = express();
 require('dotenv').config();
 
@@ -14,7 +15,7 @@ exports.addProblem = async function (req, res) {
             });
         }
 
-        const existingproblem = await Problem.findOne({ description });
+        const existingproblem = await Problem.findOne({ title: title });
         if (existingproblem) {
             return res.status(400).json({
                 success: false,
@@ -50,7 +51,29 @@ exports.addProblem = async function (req, res) {
 
 exports.searchproblem = async function (req, res) {
     try {
-        const { tags, difficulty } = req.body;
+        const { tags, difficulty, title } = req.query;
+        if(title){
+            const problem = await Problem.find({ title: title });
+            if(problem){
+                 const testcases=await TestCase.find({title:title});
+                 
+                 console.log(testcases);
+                 
+                return res.status(200).json({
+                    success: true,
+                    message: "Problem fetched successfully",
+                    problem,
+                    testcases
+                }); 
+            }
+            else{
+                return res.status(404).json({
+                    success: false,
+                    message: "Problem not found",
+                });
+            }
+          
+        }
 
         if (!tags && !difficulty) {
             return res.status(400).json({
@@ -121,4 +144,29 @@ exports.searchproblem = async function (req, res) {
         });
 
     }
+};
+
+exports.searchProblemByName = async function (req, res) {
+  try {
+   
+    
+    const { title } = req.query; // Use req.query instead of req.title
+ 
+    if (!title) {
+      return res.status(400).json({ success: false, message: 'Title is required' });
+    }
+
+    // Case-insensitive and partial match using RegExp
+    const regex = new RegExp(title, 'i'); // 'i' makes it case-insensitive
+    const problems = await Problem.find({ title: regex });
+
+    if (!problems || problems.length === 0) {
+      return res.status(404).json({ success: false, message: 'Problem not found' });
+    }
+
+    res.json({ success: true, problems });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
 };

@@ -72,30 +72,30 @@ exports.login = async (req, res) => {
     }
 
     if (await bcrypt.compare(password, user.password)) {
+      const token = jwt.sign(
+        { email: user.email, id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "24h",
+        } 
+      )
 
-      const payload = {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      };
-
-      const token = await jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '24h',
-      });
-
-      user.token = token;
-      user.password = undefined;
-
+      // Save token to user document in database
+      user.token = token
+      user.password = undefined
+      // Set cookie for token and return success response
+      // httpOnly: This ensures that the cookie cannot be accessed via JavaScript (helps prevent cross-site scripting attacks).
+      
       const options = {
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-      };
-
+      }
       res.cookie("token", token, options).status(200).json({
         success: true,
-        token, user,
-        message: "login successful",
-      });
+        token,
+        user,
+        message: `User Login Success`,
+      })
 
     } else {
       return res.status(400).json({
@@ -110,5 +110,23 @@ exports.login = async (req, res) => {
       message: 'User Login Failed',
       error: err.message,
     });
+  }
+}
+
+exports.getAllUserDetails = async (req, res) => {
+  try {
+    const id = req.user.id
+    const userDetails = await User.findById(id)
+   
+    res.status(200).json({
+      success: true,
+      message: "User Data fetched successfully",
+      data: userDetails,
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    })
   }
 }

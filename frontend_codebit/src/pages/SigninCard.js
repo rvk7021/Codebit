@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { signInStart, signInSuccess, signInFailure } from '../components/Redux/Slices/AuthSlice';
+import { setLoading, setToken } from '../components/Redux/Slices/AuthSlice';
+import { setUser } from '../components/Redux/Slices/ProfileSlice';
 
 export default function SigninCard() {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ export default function SigninCard() {
     password: "",
   });
   const [error, setError] = useState(null);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -27,8 +29,11 @@ export default function SigninCard() {
     e.preventDefault();
 
     try {
-      dispatch(signInStart()); // Start loading state
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/login`, {
+      
+      dispatch(setLoading(true));
+   
+      
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,23 +41,32 @@ export default function SigninCard() {
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
+   
+      const data = await response.json();
+   const user=data.user;
+      
       if (data.success === false) {
         setError(data.message);
-        dispatch(signInFailure(data.message)); // Store error in Redux
+        
+        dispatch(setLoading(false));
+        
         return;
-      }
+      } 
 
-      dispatch(signInSuccess(data.user)); // Save user data in Redux
+      dispatch(setToken(data.token));
+      dispatch(setUser({user }));
+      
+      dispatch(setLoading(false));
+      localStorage.setItem("token", JSON.stringify(data.token))
       setError(null);
-      console.log("Response from backend:", data);
-
-      // Navigate to dashboard on successful login
-      navigate('/dashboard');
+  
+      navigate('/');
     } catch (error) {
       setError(error.message);
-      dispatch(signInFailure(error.message)); // Store error in Redux
+      console.log('Login Failed');
+      
     }
+    dispatch(setLoading(false));
   };
 
   return (

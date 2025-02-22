@@ -6,6 +6,10 @@ const TestCasesSchema = new mongoose.Schema({
         ref: 'Problem',
         required: true
     },
+    title:{
+        type:String,
+        required:true
+    },
     TestCases: [
         {
             Input: {
@@ -14,14 +18,15 @@ const TestCasesSchema = new mongoose.Schema({
                 trim: true
             },
             ExpectedOutputs: {
-                type: [String],
+                type: String,
                 required: true,
                 validate: {
                     validator: function (v) {
-                        return v.length > 0;
+                     return v.length > 0;
                     }
-                }
+                
             }
+        }
         }
     ],
     CreatedAt: {
