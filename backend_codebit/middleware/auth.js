@@ -5,21 +5,26 @@ const User = require("../models/User");
 dotenv.config();
 exports.auth = async (req, res, next) => {
 	try {
-	  console.log("auth middleware triggered");
+
+     
+	 
   
-	  // ✅ Retrieve token only from headers or cookies (GET request has no body)
-	  const token = req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
+	 
+	  const token =req.body.token || req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
   
-	  console.log("Extracted Token:", token);
+	console.log("maine token validate kr diya");
+	
   
 	  if (!token) {
 		return res.status(401).json({ success: false, message: "Token Missing" });
 	  }
   
 	  try {
-		// ✅ Verify token
+	
 		const decode = jwt.verify(token, process.env.JWT_SECRET);
-		req.user = decode; // Attach user data to request
+		req.user = decode; 
+		console.log(req.user);
+		
 		next();
 	  } catch (error) {
 		return res.status(401).json({ success: false, message: "Invalid Token" });

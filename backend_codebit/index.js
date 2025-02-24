@@ -5,7 +5,7 @@ const database = require('./config/database');
 const dotenv = require('dotenv');
 const cloudinary = require('./config/cloudinary');
 
-database.connect();
+ database.connect();
 const userRoutes=require('./routes/user');
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());

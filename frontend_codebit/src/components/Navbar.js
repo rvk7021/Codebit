@@ -18,11 +18,11 @@ const Navbar = () => {
 
   return (
     <nav className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center">
-      <h2 className="text-xl font-bold">CodeBit</h2>
+      <Link to="/" className="text-xl font-bold">CodeBit</Link>
       <ul className="flex space-x-6">
-        <li className="hover:text-gray-300 cursor-pointer">Home</li>
+      <Link to="/" className="hover:text-gray-300 cursor-pointer">Home </Link>
         <Link to="/editor" className="hover:text-gray-300 cursor-pointer">Practice </Link>
-        <li className="hover:text-gray-300 cursor-pointer">Contests</li>
+        <Link to="/contest" className="hover:text-gray-300 cursor-pointer">Contests</Link>
         {token!=null ? (
           <button 
             onClick={handleLogout} 

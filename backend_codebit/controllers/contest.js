@@ -11,6 +11,8 @@ let cronJob;
 const fetchUpcomingContest = async () => {
     try {
         // Fetch contests data
+      console.log("Executing fetchUpcomingContest");
+      
         const codeforcesResponse = await axios.get(codeforcesUrl);
         const codechefResponse = await axios.get(codechefUrl);
         const contests = await Contest.find({});
@@ -48,6 +50,8 @@ const fetchUpcomingContest = async () => {
         //     }
         // Cleanup outdated contests
         for (const contest of contests) {
+           
+           
             if (contest.platform === 'Codeforces' && !upcomingContestNames.has(contest.name)) {
                 await Contest.findByIdAndDelete(contest._id);
             }
@@ -58,11 +62,18 @@ const fetchUpcomingContest = async () => {
             if (contest.platform.toLowerCase() === "leetcode") {
                 const startTime = contest.startTime;
                 const startDate = new Date(startTime);
+                
+                
                 const currentTime = new Date();
                 const durationInHours = contest.duration;
 
                 const endDate = new Date(startDate.getTime() + durationInHours * 60 * 60 * 1000);
+                console.log(currentTime, endDate);
+                
                 if (currentTime > endDate) {
+                  
+                    
+                      
                     if (contest.name.split('-')[0] === 'W') {
                         contest.name = 'W-' + (parseInt(contest.name.split('-')[1]) + 1);
                         const newStartDate = new Date(startDate.getTime() + (7 * 24 * 60 * 60 * 1000));
@@ -82,12 +93,13 @@ const fetchUpcomingContest = async () => {
         // Fetch upcoming contests from Codeforces
         for (const contest of upcomingCodeforcesContests) {
             const existingContest = await Contest.findOne({ name: contest.name });
+            contest.durationSeconds = contest.durationSeconds/(60*60);
             if (!existingContest) {
                 await Contest.create({
                     name: contest.name,
                     description: "All the best for the contest",
                     startTime: formatStartDateToIST(contest.startTimeSeconds),
-                    duration: (contest.durationSeconds) / 60 * 60,
+                    duration: (contest.durationSeconds) ,
                     link: "https://codeforces.com/contests",
                     platform: 'Codeforces'
                 });
@@ -149,17 +161,45 @@ exports.fetchUpcomingContestAPI = async (req, res) => {
 };
 
 // Helper function to format start date to IST
-function formatStartDateToIST(timestamp) {
-    const date = new Date(timestamp * 1000); // Convert seconds to milliseconds
-    const istOffset = 0; // Offset in milliseconds
-    const istDate = new Date(date.getTime() + istOffset);
+function formatStartDateToIST(input) {
+    // Determine if the input is a Date object or a timestamp in seconds
+    let date;
+    if (input instanceof Date) {
+        date = input;
+    } else if (typeof input === "number") {
+        // For Codeforces contests, the timestamp is in seconds
+        date = new Date(input * 1000);
+    } else {
+        // Fallback if the input is a valid date string already
+        date = new Date(input);
+    }
 
-    const year = istDate.getFullYear();
-    const month = String(istDate.getMonth() + 1).padStart(2, '0');
-    const day = String(istDate.getDate()).padStart(2, '0');
-    const hours = String(istDate.getHours()).padStart(2, '0');
-    const minutes = String(istDate.getMinutes()).padStart(2, '0');
+    // Format date components with leading zeros if necessary
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
 
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+    // Return a valid ISO 8601 datetime string using 'T' as the separator.
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+exports.getAllContests=async(req,res)=>{
+    try {
+      await  fetchUpcomingContest();
+        const contests = await Contest.find({}).sort({ startTime: 1 });
+        return res.status(200).json({
+            success: true,
+            message: "Contests fetched successfully",
+            contests
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching contests", 
+            error: error.message
+        });
+    }
 }
 

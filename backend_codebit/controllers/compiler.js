@@ -3,13 +3,15 @@ const {executeCpp}=require("./executeCpp");
 exports.executeCode = async (req, res) => {
     try {
         const { code, language,input } = req.body;
- console.log(code,language);
         if (!code || !language||input==undefined) {
             return res.status(400).json({
                 success: false,
                 message: "all fields are mandatory",
             });
         }
+ 
+        console.log(code);
+        
       
         
 const filepath = await generateFile(language, code);

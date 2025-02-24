@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 export default function CodeRunner() {
   const [code, setCode] = useState('');
   const [input, setInput] = useState('');
-  const [language, setLanguage] = useState('javascript');
+  const [language, setLanguage] = useState('cpp');
   const [output, setOutput] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -80,14 +80,7 @@ export default function CodeRunner() {
               className="mt-2 w-full p-4 h-32 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
             ></textarea>
             <div className="mt-2 flex items-center space-x-4">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="python">Python</option>
-                <option value="c++">C++</option>
-              </select>
+
               <button
                 onClick={handleSubmit}
                 disabled={loading}
