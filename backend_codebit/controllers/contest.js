@@ -5,14 +5,11 @@ const axios = require('axios');
  const codeforcesUrl = 'https://codeforces.com/api/contest.list';
  const codechefUrl='https://www.codechef.com/api/list/contests/all';
  
-const { v4: uuid } = require('uuid');
 let cronJob;
 
 const fetchUpcomingContest = async () => {
     try {
-        // Fetch contests data
-      console.log("Executing fetchUpcomingContest");
-      
+     
         const codeforcesResponse = await axios.get(codeforcesUrl);
         const codechefResponse = await axios.get(codechefUrl);
         const contests = await Contest.find({});
@@ -68,7 +65,7 @@ const fetchUpcomingContest = async () => {
                 const durationInHours = contest.duration;
 
                 const endDate = new Date(startDate.getTime() + durationInHours * 60 * 60 * 1000);
-                console.log(currentTime, endDate);
+              
                 
                 if (currentTime > endDate) {
                   
@@ -90,7 +87,6 @@ const fetchUpcomingContest = async () => {
             }
         }
 
-        // Fetch upcoming contests from Codeforces
         for (const contest of upcomingCodeforcesContests) {
             const existingContest = await Contest.findOne({ name: contest.name });
             contest.durationSeconds = contest.durationSeconds/(60*60);
@@ -122,7 +118,7 @@ const fetchUpcomingContest = async () => {
             }
         }
 
-        console.log('Contests fetched and database updated successfully');
+    
     } catch (error) {
         console.error('Error fetching contests:', error);
         throw error;
@@ -134,7 +130,7 @@ const scheduleFetch = () => {
         cronJob.stop();
     }
     cronJob = cron.schedule('*/15 * * * *', fetchUpcomingContest);
-    console.log('Scheduled next fetch in 15 minutes');
+  
 };
 
 // Initial schedule
@@ -151,7 +147,7 @@ exports.fetchUpcomingContestAPI = async (req, res) => {
             nextFetchIn: "15 minutes"
         });
     } catch (error) {
-        console.error('Error fetching contests:', error);
+       
         return res.status(500).json({
             success: false,
             message: 'Error fetching contests',

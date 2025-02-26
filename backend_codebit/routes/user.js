@@ -1,6 +1,4 @@
 const express=require('express');
-const multer = require('multer');
-const upload = multer(); 
 const router=express.Router();
 const {addProblem,searchproblem,searchProblemByName}=require('../controllers/problem');
 const {checkProblem}=require('../middleware/problem')
@@ -12,6 +10,7 @@ const {Leaderboard}=require('../controllers/leaderBoard');
 const {auth }=require('../middleware/auth');
 const {getAllUserDetails}=require('../controllers/auth');
 const {submitCode,getUserSubmissions,runCode}=require('../controllers/submission');
+const {addPost,likeUnlikePost,deletePost,getFeedPosts,getUserPosts,addComment,deleteComment,getComments}=require('../controllers/post');
 
 const { CheckSheet, CreateGroup, DeleteGroup, ShowAllGroups, AddProblemToGroup, RemoveProblemFromGroup } = require('../controllers/userSheet');
 // auth routes
@@ -39,5 +38,12 @@ router.post('/sheet/group/problem',AddProblemToGroup);
 router.delete('/sheet/group/problem',RemoveProblemFromGroup);
 router.get('/searchProblem',searchProblemByName);
 router.get("/getUserDetails",auth,getAllUserDetails);
-
+//post routes
+router.post('/post',auth,addPost);
+router.post('/post/like/:postId',auth,likeUnlikePost);
+router.delete('/post/:postId',auth,deletePost);
+router.get('/getposts',getFeedPosts);
+router.get('/post/user/:userName',auth,getUserPosts);
+router.post('/post/comment/:postId',auth,addComment);
+router.get('/post/comment/:postId',auth,getComments);
 module.exports=router;

@@ -9,10 +9,11 @@ exports.auth = async (req, res, next) => {
      
 	 
   
+
 	 
 	  const token =req.body.token || req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
   
-	console.log("maine token validate kr diya");
+	
 	
   
 	  if (!token) {
@@ -24,7 +25,7 @@ exports.auth = async (req, res, next) => {
 		const decode = jwt.verify(token, process.env.JWT_SECRET);
 		req.user = decode; 
 		console.log(req.user);
-		
+
 		next();
 	  } catch (error) {
 		return res.status(401).json({ success: false, message: "Invalid Token" });

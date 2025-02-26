@@ -4,16 +4,22 @@ const app = express();
 const database = require('./config/database');
 const dotenv = require('dotenv');
 const cloudinary = require('./config/cloudinary');
+const cookieParser=require('cookie-parser')
+const fileUpload = require('express-fileupload');
 
- database.connect();
 const userRoutes=require('./routes/user');
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
 
-
-
-
+database.connect();
 app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true 
+}));
+app.use(fileUpload());
+
+
 dotenv.config();
 let products = [
     { id: 1, name: 'Product 1', price: 100 },
