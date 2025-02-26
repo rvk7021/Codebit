@@ -54,10 +54,11 @@ export default function SigninCard() {
       } 
 
       dispatch(setToken(data.token));
-      dispatch(setUser({user }));
+      dispatch(setUser(user ));
       
       dispatch(setLoading(false));
       localStorage.setItem("token", JSON.stringify(data.token))
+      localStorage.setItem("user", JSON.stringify(user))
       setError(null);
   
       navigate('/');

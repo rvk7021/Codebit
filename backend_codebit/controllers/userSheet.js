@@ -2,44 +2,105 @@ const express = require('express');
 const app = express();
 require('dotenv').config();
 const Sheet = require('../models/Sheet');
-
+const Problem = require('../models/Problem');
 // Check sheet API call if it exists or not, then create one
+
 exports.CheckSheet = async (req, res) => {
   try {
-    let SheetData = await Sheet.findOne({
-      user: req.body.user
-    });
-
-    if (!SheetData) {
-      SheetData = await Sheet.create({
-        user: req.body.user
+    let user = req.query.user?.trim();
+    if (!user) {
+      return res.status(400).json({
+        message: "User ID is required",
+        success: false
       });
+    }
 
-      if (SheetData) {
-        return res.status(200).json({
-          message: "Sheet Created",
-          success: true
-        });
-      } else {
-        return res.status(400).json({
-          message: "Internal Server Error",
-          success: false
-        });
-      }
+    let sheetData = await Sheet.findOne({ user });
+
+    if (!sheetData) {
+      return res.status(404).json({
+        message: "Sheet does not exist",
+        success: false
+      });
     }
 
     return res.status(200).json({
-      message: "Sheet Already Exists",
+      message: "Sheet exists",
       success: true
     });
 
   } catch (error) {
     return res.status(500).json({
-      message: "Invalid User Error",
+      message: "Internal Server Error",
       success: false
     });
   }
-}
+};
+
+exports.CreateSheet = async (req, res) => {
+  try {
+    let user = req.query.user?.trim();
+    console.log("User:", user);
+    if (!user) {
+      return res.status(400).json({
+        message: "User ID is required",
+        success: false
+      });
+    }
+    let newSheet = await Sheet.create({ user });
+
+    if (newSheet) {
+      return res.status(201).json({
+        message: "Sheet created successfully",
+        success: true
+      });
+    } else {
+      return res.status(500).json({
+        message: "Failed to create sheet",
+        success: false
+      });
+    }
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false
+    });
+  }
+};
+
+// Sheet Deletion API call
+exports.DeleteSheet = async (req, res) => {
+  try {
+    let user = req.query.user?.trim();
+    if (!user) {
+      return res.status(400).json({
+        message: "User ID is required",
+        success: false
+      });
+    }
+
+    let sheetData = await Sheet.findOneAndDelete({ user });
+
+    if (!sheetData) {
+      return res.status(404).json({
+        message: "Sheet does not exist",
+        success: false
+      });
+    }
+
+    return res.status(200).json({
+      message: "Sheet deleted successfully",
+      success: true
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false
+    });
+  }
+};
 
 // Group creation API call
 exports.CreateGroup = async (req, res) => {
@@ -49,7 +110,8 @@ exports.CreateGroup = async (req, res) => {
     if (!SheetData) {
       return res.status(400).json({
         message: "Sheet not found",
-        success: false
+        success: false,
+        groupNames: []
       });
     }
 
@@ -58,17 +120,19 @@ exports.CreateGroup = async (req, res) => {
     if (!groupName) {
       return res.status(400).json({
         message: "GroupName is required",
-        success: false
+        success: false,
+        groupNames: SheetData.groups.map(group => group.groupName)
       });
     }
 
     // Check if the group already exists
-    const groupExists = SheetData.groups.some(group => group.groupName === groupName);
+    const groupExists = SheetData.groups.some(group => group.groupName.toLowerCase() === groupName.toLowerCase());
 
     if (groupExists) {
       return res.status(400).json({
         message: "Group Already Exists",
-        success: false
+        success: false,
+        groupNames: SheetData.groups.map(group => group.groupName)
       });
     }
 
@@ -86,20 +150,22 @@ exports.CreateGroup = async (req, res) => {
     if (updatedSheet) {
       return res.status(200).json({
         message: "Group Created",
-        success: true
+        success: true,
+        groupNames: updatedSheet.groups.map(group => group.groupName)
       });
     }
 
     return res.status(400).json({
       message: "Failed to create group",
-      success: false
+      success: false,
+      groupNames: SheetData.groups.map(group => group.groupName)
     });
-
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({
       message: "Internal Server Error",
-      success: false
+      success: false,
+      groupNames: []
     });
   }
 };
@@ -107,13 +173,13 @@ exports.CreateGroup = async (req, res) => {
 // Delete group API call
 exports.DeleteGroup = async (req, res) => {
   try {
-    // Find the user's sheet
     const SheetData = await Sheet.findOne({ user: req.body.user });
 
     if (!SheetData) {
       return res.status(400).json({
         message: "Sheet not found",
-        success: false
+        success: false,
+        groupNames: []
       });
     }
 
@@ -122,57 +188,60 @@ exports.DeleteGroup = async (req, res) => {
     if (!groupName) {
       return res.status(400).json({
         message: "GroupName is required",
-        success: false
+        success: false,
+        groupNames: SheetData.groups.map(group => group.groupName)
       });
     }
 
-    // Check if the group exists
     const groupExists = SheetData.groups.some(group => group.groupName === groupName);
 
     if (!groupExists) {
       return res.status(400).json({
         message: "Group Not Exists",
-        success: false
+        success: false,
+        groupNames: SheetData.groups.map(group => group.groupName)
       });
     }
 
     // Remove the group
-    const UpdatedSheet = await SheetData.updateOne({
+    const updatedSheet = await SheetData.updateOne({
       $pull: {
         groups: { groupName: groupName }
       }
     });
 
-    if (UpdatedSheet.modifiedCount > 0) {
+    if (updatedSheet.modifiedCount > 0) {
+      const refreshedSheet = await Sheet.findOne({ user: req.body.user });
       return res.status(200).json({
         message: "Group Deleted",
-        success: true
+        success: true,
+        groupNames: refreshedSheet ? refreshedSheet.groups.map(group => group.groupName) : []
       });
     }
 
     return res.status(400).json({
       message: "Failed to delete group",
-      success: false
+      success: false,
+      groupNames: SheetData.groups.map(group => group.groupName)
     });
-
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({
       message: "Internal Server Error",
-      success: false
+      success: false,
+      groupNames: []
     });
   }
 };
 
+
 // Show all groups API call
 exports.ShowAllGroups = async (req, res) => {
   try {
-    const user = req.body.user;
-    // console.log("User:", user);
-
+    let query={};
+    query.user=req.query.user?.trim();
     // Fetch the sheet data for the user
-    const SheetData = await Sheet.findOne({ user: user });
-
+    const SheetData = await Sheet.findOne(query);
     // Handle case where the sheet is not found
     if (!SheetData) {
       // console.log("Sheet not found");
@@ -198,6 +267,7 @@ exports.ShowAllGroups = async (req, res) => {
     });
   }
 };
+
 
 // Add problem to group API call 
 exports.AddProblemToGroup = async (req, res) => {
@@ -283,6 +353,7 @@ exports.AddProblemToGroup = async (req, res) => {
   }
 }
 
+
 // Remove problem from group API call
 exports.RemoveProblemFromGroup = async (req, res) => {
   try {
@@ -336,6 +407,64 @@ exports.RemoveProblemFromGroup = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       message: "Failed to remove problem",
+      success: false
+    });
+  }
+};
+
+// Show problems in group API call
+exports.ShowProblemsInGroup = async (req, res) => {
+  try {
+    const user = req.query.user?.trim();
+    const groupName = req.query.groupName?.trim();
+    console.log("User:", user);
+    console.log("Group:", groupName);
+    // Validate input
+    if (!user || !groupName) {
+      return res.status(400).json({
+        message: "User ID and group name are required",
+        success: false
+      });
+    }
+
+    // Find the sheet by user (assuming `Sheet` is a plain JavaScript object/array from a database)
+    const sheet = await Sheet.findOne({ user });
+
+    if (!sheet) {
+      return res.status(404).json({
+        message: "No sheet found for the user",
+        success: false
+      });
+    }
+
+    // Find the group by groupName (case-insensitive)
+    const group = sheet.groups.find(g => g.groupName.toLowerCase() === groupName.toLowerCase());
+
+    if (!group) {
+      return res.status(404).json({
+        message: "Group not found",
+        success: false
+      });
+    }
+    if(!group.problems){
+      return res.status(200).json({
+        message: "No problems in the group",
+        success: true,
+        problems: []
+      });
+    }
+    const ProblemList=await Problem.find({_id:{$in:group.problems.map(prob=>prob.problem)}},{title:1,description:1,tags:1,difficulty:1});
+    // Return the problems in the group
+    return res.status(200).json({
+      message: "Problems fetched successfully",
+      problems: ProblemList,
+      success: true
+    });
+
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      message: "Failed to fetch problems",
       success: false
     });
   }

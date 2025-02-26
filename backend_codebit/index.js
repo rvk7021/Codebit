@@ -9,10 +9,6 @@ const cloudinary = require('./config/cloudinary');
 const userRoutes=require('./routes/user');
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-
-
-
-
 app.use(express.json());
 dotenv.config();
 let products = [

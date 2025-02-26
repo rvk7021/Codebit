@@ -1,40 +1,133 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from './Redux/Slices/AuthSlice';
+
 const Navbar = () => {
- const {token}=useSelector(state=>state.auth);
-//  const {user}=useSelector(state=>state.profile); 
+  const { token } = useSelector(state => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-   dispatch(signOut());
+    dispatch(signOut());
     navigate('/sign-in');
   };
- 
-  
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const closeMenu = () => {
+    setIsOpen(false);
+  };
 
   return (
-    <nav className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold">CodeBit</Link>
-      <ul className="flex space-x-6">
-      <Link to="/" className="hover:text-gray-300 cursor-pointer">Home </Link>
-        <Link to="/editor" className="hover:text-gray-300 cursor-pointer">Practice </Link>
-        <Link to="/contest" className="hover:text-gray-300 cursor-pointer">Contests</Link>
-        {token!=null ? (
-          <button 
-            onClick={handleLogout} 
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-          >
-            Logout
-          </button>
-        ) : (
-          <Link to="/sign-in" className="hover:text-gray-300 cursor-pointer">Login</Link>
-        )}
-      </ul>
-    </nav>
+    <>
+      <nav className="bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white py-4 px-6 shadow-lg fixed w-full z-20">
+        <div className="container mx-auto flex justify-between items-center">
+          {/* Logo */}
+          <Link to="/" className="text-xl font-bold tracking-wider flex items-center">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">CodeBit</span>
+          </Link>
+
+          {/* Mobile menu button */}
+          <div className="sm:hidden">
+            <button
+              onClick={toggleMenu}
+              className="text-white focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden sm:flex space-x-6 items-center">
+            <Link to="/" className="hover:text-indigo-300 transition-colors duration-200">Home</Link>
+            <Link to="/editor" className="hover:text-indigo-300 transition-colors duration-200">Compiler</Link>
+            <Link to="/contest" className="hover:text-indigo-300 transition-colors duration-200">Contests</Link>
+            <Link to="/problem-set" className="hover:text-indigo-300 transition-colors duration-200">Problems</Link>
+            <Link to="/profile" className="hover:text-indigo-300 transition-colors duration-200">Profile</Link>
+            
+            {token != null ? (
+              <button
+                onClick={handleLogout}
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-md shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+              >
+                Logout
+              </button>
+            ) : (
+              <div className="flex space-x-4">
+                <Link 
+                  to="/sign-in" 
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-md shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/sign-up" 
+                  className="bg-indigo-950 border border-indigo-500 text-white px-4 py-2 rounded-md shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {/* Fullscreen Mobile Navigation - Slides in from left */}
+      <div className={`fixed inset-0 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 z-10 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out sm:hidden`}>
+        <div className="flex flex-col h-full justify-center items-center">
+          <div className="flex flex-col space-y-8 text-center">
+            <Link to="/" className="text-white text-2xl font-semibold hover:text-indigo-300 transition-colors duration-200" onClick={closeMenu}>Home</Link>
+            <Link to="/editor" className="text-white text-2xl font-semibold hover:text-indigo-300 transition-colors duration-200" onClick={closeMenu}>Practice</Link>
+            <Link to="/contest" className="text-white text-2xl font-semibold hover:text-indigo-300 transition-colors duration-200" onClick={closeMenu}>Contests</Link>
+            <Link to="/problem-set" className="text-white text-2xl font-semibold hover:text-indigo-300 transition-colors duration-200" onClick={closeMenu}>Problems</Link>
+            <Link to="/profile" className="text-white text-2xl font-semibold hover:text-indigo-300 transition-colors duration-200" onClick={closeMenu}>Profile</Link>
+            
+            {token != null ? (
+              <button
+                onClick={() => {
+                  handleLogout();
+                  closeMenu();
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-md text-xl font-semibold mx-auto"
+              >
+                Logout
+              </button>
+            ) : (
+              <div className="flex flex-col space-y-4 items-center">
+                <Link 
+                  to="/sign-in" 
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-md text-xl font-semibold"
+                  onClick={closeMenu}
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/sign-up" 
+                  className="bg-indigo-950 border border-indigo-500 text-white px-6 py-3 rounded-md text-xl font-semibold"
+                  onClick={closeMenu}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
