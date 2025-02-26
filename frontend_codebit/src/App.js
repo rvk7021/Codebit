@@ -4,17 +4,17 @@ import React from 'react';
 import SignupCard from './pages/SignupCard';
 import SigninCard from './pages/SigninCard';
 import Home from './pages/Home';
-
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import {  Routes, Route } from 'react-router-dom';
 import CodeRunner from './pages/Editor';
 import ProblemPractice from './pages/ProblemPractice';
 import Layout from './components/Layout';
-
+import ProblemSet from './pages/ProblemSet';
+import Post from './pages/Post';
 import Profile from './pages/Profile';
 import Contest from './pages/contest';
-
+import { Sheet } from './components/Sheet';
 function App() {
  
   return (
@@ -28,22 +28,16 @@ function App() {
           <Route path="editor" element={<CodeRunner />} />
           <Route path="problem-practice/:title" element={<ProblemPractice />} />
          <Route path='contest' element={<ProtectedRoute><Contest/>  </ProtectedRoute> }/>
+         <Route path='profile' element={ <ProtectedRoute><Profile/></ProtectedRoute> }/>
+         <Route path='/problem-set' element={<ProblemSet/>}/>
+
+
+         <Route path='posts' element={<Post/>}></Route>
         </Route>
-
-        <Route path='profile' element={ <ProtectedRoute><Profile/></ProtectedRoute> }/>
-
     <Route path='/sign-in' element={<SigninCard />}/>
     <Route path='/sign-up' element={<SignupCard />}/>
-    <Route path='/dashboard' element={<Navbar/>}/>
-    {/* <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        /> */}
-   
+    <Route path='/sheet' element={<Sheet />}/>
+    {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
   </Routes>
 
   );

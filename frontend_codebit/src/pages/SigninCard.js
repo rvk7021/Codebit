@@ -17,7 +17,7 @@ export default function SigninCard() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log("Field updated:", name, value);
+    
     setFormData({
       ...formData,
       [name]: value,
@@ -54,10 +54,11 @@ export default function SigninCard() {
       } 
 
       dispatch(setToken(data.token));
-      dispatch(setUser({user }));
+      dispatch(setUser(user ));
       
       dispatch(setLoading(false));
       localStorage.setItem("token", JSON.stringify(data.token))
+      localStorage.setItem("user", JSON.stringify(user))
       setError(null);
   
       navigate('/');

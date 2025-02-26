@@ -63,7 +63,7 @@ export default function Profile() {
 // bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900
   return (
 
-    <div className="profile bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 lg:px-10 lg:py-3 p-2">
+    <div className="profile  bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 pt-16 sm:pt-20 lg:px-10 lg:pt-20 p-2">
       <div className="profile-box grid  lg:grid-cols-[30%,70%]  md:gap-2 md:p-2 lg:gap-4">
         {/* Information section */}
         <div className="profile-section-parent p-1 items-center">

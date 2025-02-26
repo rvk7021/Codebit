@@ -10,6 +10,8 @@ const fileUpload = require('express-fileupload');
 const userRoutes=require('./routes/user');
 
 database.connect();
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));

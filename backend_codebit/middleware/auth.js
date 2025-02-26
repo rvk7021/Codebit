@@ -1,4 +1,3 @@
-
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const User = require("../models/User");
@@ -37,4 +36,3 @@ exports.auth = async (req, res, next) => {
 	  });
 	}
   };
-  
