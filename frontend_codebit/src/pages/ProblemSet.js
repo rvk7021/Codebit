@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 // import Navbar from '../components/Navbar';
+import Swal from 'sweetalert2';
+
 export default function ProblemSet() {
+  const [showDropdown, setShowDropdown] = useState(null);
+  const [selectedProblem, setSelectedProblem] = useState(null);
+  const [groupNames, setGroupNames] = useState([]);
   const navigate = useNavigate();
   const [problems, setProblems] = useState([]);
   const [filteredProblems, setFilteredProblems] = useState([]);
@@ -15,7 +21,13 @@ export default function ProblemSet() {
   const [showAllTags, setShowAllTags] = useState(false);
   const problemsPerPage = 10;
   const searchBarRef = useRef(null);
-  const filterTimeoutRef = useRef(null);
+  const [selectedGroupsMap, setSelectedGroupsMap] = useState({});  const filterTimeoutRef = useRef(null);
+  const [sheetExist, setSheetExist] = useState(false);
+  const [showAllGroups, setShowAllGroups] = useState(false);  
+
+  const user = "67b763880f46dda593091732";
+
+  
 
   // Expanded list of difficulties and tags
   const difficulties = ['easy', 'medium', 'hard'];
@@ -29,6 +41,88 @@ export default function ProblemSet() {
   // Initial visible tags
   const visibleTagsCount = 8;
 
+
+  const handleSaveSelectedGroups = async (problemId, selectedGroups) => {
+    if (selectedGroups.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No group selected',
+        text: 'Please select at least one group.',
+        confirmButtonColor: '#3085d6',
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp'
+        }
+      });
+      return;
+    }
+  
+    try {
+      for (const group of selectedGroups) {
+        // Capitalize the first letter of the group name
+        const capitalizedGroup = group.charAt(0).toUpperCase() + group.slice(1);
+  
+        const body = new URLSearchParams({ user, problemId, groupName: group }).toString();
+        const url = `${process.env.REACT_APP_BASE_URL}/sheet/group/problem`;
+  
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: body
+        });
+  
+        const data = await response.json();
+        if (!response.ok) {
+          console.error(data.message);
+          await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            html: `${data.message} in the <strong>${capitalizedGroup}</strong>`,
+            confirmButtonColor: '#d33',
+            showClass: {
+              popup: 'animate__animated animate__shakeX'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutUp'
+            }
+          });
+        } else if (data.success) {
+          console.log(data.message);
+          await Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            html: ` ${data.message} in the <strong>${capitalizedGroup}</strong>`,
+            confirmButtonColor: '#3085d6',
+            showClass: {
+              popup: 'animate__animated animate__tada'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutUp'
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error saving groups:', error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to save please try',
+        confirmButtonColor: '#d33',
+        showClass: {
+          popup: 'animate__animated animate__shakeX'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp'
+        }
+      });
+    }
+  };
+  
   useEffect(() => {
     const fetchProblems = async () => {
       try {
@@ -57,6 +151,56 @@ export default function ProblemSet() {
 
     fetchProblems();
   }, []);
+
+  // to fetch groups names of the user
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const queryParams = new URLSearchParams({ user }).toString();
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/check?${queryParams}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch groups');
+        }
+  
+        const data = await response.json();
+        if (data.success) {
+          setSheetExist(true);
+          const groupsResponse = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/groups?${queryParams}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+  
+          if (!groupsResponse.ok) {
+            throw new Error('Failed to fetch groups');
+          }
+  
+          const groupsData = await groupsResponse.json();
+          if (groupsData.success) {
+            setGroupNames(groupsData.groups);
+            console.log(groupNames);
+
+          }
+        }
+
+      } catch (error) {
+        console.error('Error fetching groups:', error);
+        setError(error.message);
+      }
+    };
+  
+    fetchGroups();
+  }, [user]);
+  
+  
+
 
   useEffect(() => {
     // Set filtering state to show loader
@@ -388,35 +532,199 @@ export default function ProblemSet() {
                   <Loader />
                 ) : currentProblems.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {currentProblems.map((problem) => (
-                      <button
-                        key={problem}
-                        onClick={() => handleProblemClick(problem)}
-                        className="bg-slate-800 border border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-700 transition-all p-4 text-left w-full"
-                      >
-                        <div className="flex justify-between items-start">
-                          <h3 className="text-lg font-medium text-white">{problem.title}</h3>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(problem.difficulty)}`}>
-                            {problem.difficulty || 'Unknown'}
-                          </span>
+{currentProblems.map((problem) => (
+  <div key={problem} className="relative">
+    <button
+      onClick={() => handleProblemClick(problem)}
+      className="bg-slate-800 border border-slate-700 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-700 transition-all p-4 text-left w-full"
+    >
+      <div className="flex justify-between items-start">
+        <h3 className="text-lg font-medium text-white">{problem.title}</h3>
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(problem.difficulty)}`}>
+          {problem.difficulty || 'Unknown'}
+        </span>
+      </div>
+      {problem.description && (
+        <p className="mt-2 text-sm text-slate-300 line-clamp-2">{problem.description}</p>
+      )}
+      
+      <div className="mt-3 grid grid-cols-[auto_1fr] gap-2 items-start">
+        {/* Add button and dropdown container */}
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering the parent button
+              setSelectedProblem(problem);
+              setShowDropdown(prev => prev === problem._id ? null : problem._id);
+              
+              // Reset the showAllGroups state when opening the dropdown
+              if (showDropdown !== problem._id) {
+                setShowAllGroups(false);
+              }
+
+              // Initialize selectedGroups for this problem if not already set
+              if (!selectedGroupsMap[problem._id]) {
+                setSelectedGroupsMap(prev => ({
+                  ...prev,
+                  [problem._id]: []
+                }));
+              }
+            }}
+            className="px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded hover:bg-indigo-700"
+          >
+            Add
+          </button>
+          
+          {/* Dropdown menu - Using onClick to stop propagation at the container level */}
+          {showDropdown === problem._id && (
+            <div 
+              className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-slate-800 border border-slate-700 z-10"
+              onClick={(e) => e.stopPropagation()} // Stop propagation for the entire dropdown
+            >
+              <div className="p-3">
+                {/* Close button */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDropdown(null);
+                  }}
+                  className="absolute top-2 right-2 text-slate-400 hover:text-white"
+                  aria-label="Close dropdown"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                
+                {!sheetExist ? (
+                  <div className="text-white text-sm py-2">
+                    Please create a sheet first.
+                  </div>
+                ) : groupNames.length === 0 ? (
+                  <div className="text-white text-sm py-2">
+                    Please create groups first.
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-indigo-300 text-sm font-medium mb-2">
+                      Select groups:
+                    </div>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {/* Show only the first 4 group names initially */}
+                      {groupNames.slice(0, showAllGroups ? groupNames.length : 4).map((group, index) => (
+                        <div key={index} className="flex items-center">
+                          <input
+                            id={`group-${index}-${problem._id}`}
+                            type="checkbox"
+                            className="h-4 w-4 text-indigo-600 border-slate-600 rounded bg-slate-700"
+                            checked={selectedGroupsMap[problem._id]?.includes(group) || false}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              const isChecked = e.target.checked;
+                              
+                              setSelectedGroupsMap(prev => {
+                                const currentSelected = [...(prev[problem._id] || [])];
+                                
+                                if (isChecked) {
+                                  // Add group if not already in the array
+                                  if (!currentSelected.includes(group)) {
+                                    currentSelected.push(group);
+                                  }
+                                } else {
+                                  // Remove group if it exists in the array
+                                  const index = currentSelected.indexOf(group);
+                                  if (index !== -1) {
+                                    currentSelected.splice(index, 1);
+                                  }
+                                }
+                                
+                                return {
+                                  ...prev,
+                                  [problem._id]: currentSelected
+                                };
+                              });
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <label
+                            htmlFor={`group-${index}-${problem._id}`}
+                            className="ml-2 text-sm text-white"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {group}
+                          </label>
                         </div>
-                        {problem.description && (
-                          <p className="mt-2 text-sm text-slate-300 line-clamp-2">{problem.description}</p>
-                        )}
-                        {problem.tags && problem.tags.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-1">
-                            {problem.tags.map((tag, index) => (
-                              <span 
-                                key={index} 
-                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-950 text-indigo-300"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                      ))}
+                      
+                      {/* Load More button if there are more than 4 group names */}
+                      {groupNames.length > 4 && !showAllGroups && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowAllGroups(true);
+                          }}
+                          className="w-full mt-1 px-2 py-1 text-xs text-indigo-300 hover:text-indigo-200 flex items-center justify-center"
+                        >
+                          <span>Load More</span>
+                          <svg className="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      )}
+                      
+                      {/* Show Less button if showing all groups */}
+                      {showAllGroups && groupNames.length > 4 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowAllGroups(false);
+                          }}
+                          className="w-full mt-1 px-2 py-1 text-xs text-indigo-300 hover:text-indigo-200 flex items-center justify-center"
+                        >
+                          <span>Show Less</span>
+                          <svg className="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Handle saving the selected groups for this problem
+                          handleSaveSelectedGroups(problem._id, selectedGroupsMap[problem._id] || []);
+                          setShowDropdown(null); // Close dropdown when done
+                        }}
+                        className="px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded hover:bg-indigo-700"
+                      >
+                        Done
                       </button>
-                    ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Tags container */}
+        <div className="flex flex-wrap gap-1">
+          {problem.tags && problem.tags.length > 0 && 
+            problem.tags.map((tag, index) => (
+              <span 
+                key={index} 
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-950 text-indigo-300"
+              >
+                {tag}
+              </span>
+            ))
+          }
+        </div>
+      </div>
+    </button>
+  </div>
+))}
                   </div>
                 ) : (
                   <div className="px-6 py-12 text-center">

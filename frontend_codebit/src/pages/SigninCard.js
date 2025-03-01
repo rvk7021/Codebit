@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { setLoading, setToken } from '../components/Redux/Slices/AuthSlice';
-import { setUser } from '../components/Redux/Slices/ProfileSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser,setLoading } from '../components/Redux/Slices/ProfileSlice';
 
 export default function SigninCard() {
+
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -32,12 +33,13 @@ export default function SigninCard() {
       
       dispatch(setLoading(true));
    
-      
+        console.log(formData);
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
@@ -53,12 +55,11 @@ export default function SigninCard() {
         return;
       } 
 
-      dispatch(setToken(data.token));
+  
       dispatch(setUser(user ));
       
       dispatch(setLoading(false));
-      localStorage.setItem("token", JSON.stringify(data.token))
-      localStorage.setItem("user", JSON.stringify(user))
+
       setError(null);
   
       navigate('/');

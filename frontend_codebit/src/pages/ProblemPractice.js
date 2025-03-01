@@ -17,7 +17,7 @@ export default function ProblemPractice() {
   const [showAcceptedAnimation, setShowAcceptedAnimation] = useState(false);
   const { title } = useParams(); 
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
 
   useEffect(() => {
     const savedCode = sessionStorage.getItem('code');
@@ -32,11 +32,11 @@ export default function ProblemPractice() {
   }, [code]);
 
   useEffect(() => {
-    if (!token) {
+    if (!user) {
       navigate("/sign-in");
     }
-    console.log("Token:", token);
-  }, [token, navigate]);
+    
+  }, [user, navigate]);
 
   useEffect(() => {
     async function fetchProblemData() {
@@ -49,6 +49,8 @@ export default function ProblemPractice() {
         });
         
         const data = await res.json();
+        console.log(data);
+        
         setProblem(data.problem[0]);
         setTestCases(data.testcases[0].TestCases || []);
       } catch (err) {
@@ -73,6 +75,7 @@ export default function ProblemPractice() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include',
         body: JSON.stringify({ code, title, test }),
       });
 
@@ -101,7 +104,8 @@ export default function ProblemPractice() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ code, title, token, testCases }),
+        credentials: 'include',
+        body: JSON.stringify({ code, title, testCases,problem }),
       });
       
       const data = await res.json();
@@ -231,7 +235,7 @@ export default function ProblemPractice() {
     
           <div className="p-6 flex-1 h-[500px] overflow-auto">
             {problem ? (
-              showSubmission ? <Submission title={problem.title} setCode={setCode} /> : <Problem problem={problem} />
+              showSubmission ? <Submission title={problem.title} setCode={setCode}  problem={problem} /> : <Problem problem={problem} />
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
                 <Loader />

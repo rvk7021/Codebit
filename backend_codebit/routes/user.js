@@ -8,14 +8,21 @@ const {fetchUpcomingContestAPI,getAllContests}=require('../controllers/contest')
 const {executeCode}=require('../controllers/compiler')
 const {Leaderboard}=require('../controllers/leaderBoard');
 const {auth }=require('../middleware/auth');
-const {getAllUserDetails}=require('../controllers/auth');
+const {getAllUserDetails,getUser,logout,updateProfile,addSocialMediaAccount}=require('../controllers/auth');
 const {submitCode,getUserSubmissions,runCode}=require('../controllers/submission');
-const {addPost,likeUnlikePost,deletePost,getFeedPosts,getUserPosts,addComment,deleteComment,getComments}=require('../controllers/post');
-
+const {addPost,likeUnlikePost,deletePost,getFeedPosts,getUserPosts,addComment,getComments}=require('../controllers/post');
+const {fetchCodeChefRating,fetchCodeforcesRating,fetchLeetCodeRating}=require('../controllers/rating');
 const { CheckSheet, CreateGroup, DeleteGroup, DeleteSheet,ShowAllGroups,CreateSheet, AddProblemToGroup, RemoveProblemFromGroup,ShowProblemsInGroup } = require('../controllers/userSheet');
 // auth routes
 router.post('/login',login);
 router.post('/signup',signup);
+router.post('/logout', auth, logout);
+router.get('/getUser',auth,getUser);
+router.post('/uploadProfile',auth,updateProfile);
+router.post('/addsocialmedia',auth,addSocialMediaAccount);
+router.get('/fetchcodeforcesrating/:username',auth,fetchCodeforcesRating);
+router.get('/fetchcodechefrating/:username',auth,fetchCodeChefRating);
+router.get('/fetchleetcoderating/:username',auth,fetchLeetCodeRating);
 // problem routes
 router.post('/problems',checkProblem,addProblem);
 router.get('/problems/search',searchproblem);

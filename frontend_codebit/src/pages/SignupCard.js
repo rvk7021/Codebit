@@ -37,6 +37,7 @@ headers: {
 body: JSON.stringify(formData),
 });
 const data = await res.json();
+console.log(data);
 if (data.success === false) {
 setError(data.message);
 setLoading(false);
@@ -44,7 +45,7 @@ return;
 }
 setLoading(false);
 setError(null);
-navigate('/signin');
+navigate('/sign-in');
 
 } catch (error) {
 setLoading(false);

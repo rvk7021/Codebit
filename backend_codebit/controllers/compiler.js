@@ -10,12 +10,9 @@ exports.executeCode = async (req, res) => {
             });
         }
  
-        console.log(code);
-        
       
         
 const filepath = await generateFile(language, code);
-console.log(filepath);
 
 const output=await executeCpp(filepath,input);
         return res.status(200).json({

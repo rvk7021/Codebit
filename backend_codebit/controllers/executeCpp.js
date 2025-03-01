@@ -40,7 +40,7 @@
                     
                       if (fs.existsSync(filepath)) fs.unlinkSync(filepath);  
                       if (fs.existsSync(outPath)) fs.unlinkSync(outPath);  
-                      console.log("Cleanup successful");
+             ;
                   } catch (cleanupError) {
                       console.error("Error cleaning up files:", cleanupError);
                   }

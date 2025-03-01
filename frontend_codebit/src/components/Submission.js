@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function Submission({ title, setCode }) {
-  const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
   const [submissions, setSubmissions] = useState([]);
   const [visibleSubmissions, setVisibleSubmissions] = useState(4); // Show 4 submissions initially
 
@@ -16,7 +16,7 @@ export default function Submission({ title, setCode }) {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ token }),
+            credentials: 'include',
           }
         );
 
@@ -31,10 +31,10 @@ export default function Submission({ title, setCode }) {
       }
     };
 
-    if (token) {
+    if (user) {
       fetchSubmissions();
     }
-  }, [token, title]);
+  }, [user, title]);
 
   const handleLoadMore = () => {
     setVisibleSubmissions((prev) => prev + 4); // Increase visible submissions by 4

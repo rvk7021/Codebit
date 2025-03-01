@@ -1,21 +1,22 @@
 const Submission = require("../models/Submission");
 const TestCase = require("../models/TestCases");
 const axios = require("axios");
-
+const User=require('../models/User');
 exports.submitCode = async (req, res) => {
     try {
-        const { title, code ,testCases} = req.body;
+      
+        const { title, code ,testCases,problem} = req.body;
   
         if (!title || !code ) {
             return res.status(400).json({ success: false, message: "All fields are mandatory" });
         }
 
         
-    
+     
         if (!testCases) {
             return res.status(404).json({ success: false, message: "Test cases not found" });
         }
-      
+       
         
 
         let allPassed = true;
@@ -55,17 +56,68 @@ exports.submitCode = async (req, res) => {
                
                if(results.length>2) { break;}
             }
-          
+         
 
            
         }
           
-        const user=req.user.id ;
+        const userId=req.user.id ;
+        const user=await User.findById(userId);
          
       const status = allPassed ? "Accepted" : "Wrong Answer";
-        
             const submission = await Submission.create({user:user, title:title, code:code,status:status });
+          
+            
             if(allPassed){
+
+
+const topicMap = new Map(user.topics.map(topic => [topic.topicName, topic]));
+
+let alreadyExist=true;
+let newTopicCreated=false;
+
+for (let topic of problem.tags) {
+    if (!topicMap.has(topic)) {
+        topicMap.set(topic, { topicName: topic, problems: [{ problemId: problem._id }] });
+        newTopicCreated = true;
+    } else {
+    
+        let userTopic = topicMap.get(topic);
+
+       
+        if (!userTopic.problems.some(p => p.problemId.equals(problem._id))) {
+            alreadyExist = false;
+            userTopic.problems.push({ problemId: problem._id });
+        }
+    }
+}
+
+user.topics = Array.from(topicMap.values());
+
+if((alreadyExist&&newTopicCreated)||(!alreadyExist)){
+ user.problemSolved++;
+
+if (problem.difficulty === "Easy") user.Easy++;
+else if (problem.difficulty === "Medium") user.Medium++;
+else if (problem.difficulty === "Hard") user.Hard++;
+
+}
+
+
+
+            }
+            const today = new Date().toISOString().split("T")[0]; 
+
+            if (!user.activeDays.includes(today)) {
+                user.activeDays.push(today); 
+            }
+
+user.SubmissionCount++;
+
+await user.save();
+
+if(allPassed){
+
             return res.status(200).json({ success: true, message: "Code Accepted Successful",results ,status:status });
         } else {
             return res.status(200).json({ success: true, message: " Code Not Accepted", results });

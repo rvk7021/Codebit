@@ -37,38 +37,54 @@ const userSchema = new mongoose.Schema(
       enum: ["student", "admin", "interviewer"],
       required: false,
     },
+    topics: [
+      {
+        topicName: { type: String, required: true },
+        problems: [
+          {
+            problemId: { type: mongoose.Schema.Types.ObjectId, ref: "Problem" },
+          },
+        ],
+      },
+    ],
+    SubmissionCount: {
+      type: Number,
+      default: 0,
+    },
+    problemSolved: {
+      type: Number,
+      default: 0,
+    },
+    Easy: {
+      type: Number,
+      default: 0,
+    },
+    Medium: {
+      type: Number,
+      default: 0,
+    },
+    Hard: {
+      type: Number,
+      default: 0,
+    },
+    activeDays: [{ type: String }],
+  
     bio: {
       type: String
     },
     token: {
       type: String,
     },
-    resetPasswordExpires: {
-      type: Date,
-    },
     profilePic: {
       type: String,
     },
-    topics: { type: [String], required: true },
     createdAt: {
       type: Date,
       default: Date.now,
     },
-    problemsSolved: {
-      type: Number,
-      default: 0
-    },
-    solvedProblems: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Problem'
-    }],
     updatedAt: {
       type: Date,
       default: Date.now,
-    },
-    profilePic: {
-      type: String,
-      require: false
     },
     codingProfile: [{
       profileName: {
@@ -82,6 +98,21 @@ const userSchema = new mongoose.Schema(
         }
       }
     }],
+    SocialMedia: [{
+      platform: {
+        type: String,
+        require: false
+      },
+      username: {
+        type: String,
+        require: false
+      }
+    }],
+    Country:{
+        type:String,
+        default:"India"
+    },
+
   }
 );
 

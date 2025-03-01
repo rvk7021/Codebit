@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit"
-
+import { persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 const initialState = {
-  user:  localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null,
-  loading: false,
+  user:  null,
+  loading: false
 }
 
 const profileSlice = createSlice({
@@ -10,16 +11,19 @@ const profileSlice = createSlice({
   initialState: initialState,
   reducers: {
     setUser(state, value) {
-      
-        
       state.user = value.payload
     },
     setLoading(state, value) {
       state.loading = value.payload
     },
+    setLogout: (state) => {
+      state.user = null;
+     
+      storage.removeItem('persist:root'); 
+    },
   },
 })
 
-export const { setUser, setLoading } = profileSlice.actions
+export const { setUser, setLoading,setLogout } = profileSlice.actions
 
 export default profileSlice.reducer

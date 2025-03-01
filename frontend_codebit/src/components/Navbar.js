@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { signOut } from './Redux/Slices/AuthSlice';
+import { setLogout } from './Redux/Slices/ProfileSlice';
 
 const Navbar = () => {
-  const { token } = useSelector(state => state.auth);
+  const {user}=useSelector(state=>state.profile)
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    dispatch(signOut());
+  const handleLogout =async () => {
+    const response=await fetch(`${process.env.REACT_APP_BASE_URL}/logout`,{method:"POST",credentials:"include"});
+    const data=await response.json();
+    dispatch(setLogout());
     navigate('/sign-in');
   };
 
@@ -61,7 +62,7 @@ const Navbar = () => {
             <Link to="/posts" className="hover:text-indigo-300 transition-colors duration-200">Posts</Link>
             <Link to="/profile" className="hover:text-indigo-300 transition-colors duration-200">Profile</Link>
 
-            {token != null ? (
+            {user != null ? (
               <button
                 onClick={handleLogout}
                 className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-md shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
@@ -99,7 +100,7 @@ const Navbar = () => {
             <Link to="/posts" className="text-white text-2xl font-semibold hover:text-indigo-300 transition-colors duration-200" onClick={closeMenu}>Posts</Link>
             <Link to="/profile" className="text-white text-2xl font-semibold hover:text-indigo-300 transition-colors duration-200" onClick={closeMenu}>Profile</Link>
 
-            {token != null ? (
+            {user != null ? (
               <button
                 onClick={() => {
                   handleLogout();

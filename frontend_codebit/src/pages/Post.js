@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FaHeart, FaRegHeart, FaComment, FaPlus } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaComment, FaPlus, FaEllipsisV } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useSelector } from 'react-redux';
 
@@ -10,17 +9,16 @@ const Post = () => {
   const [newPostContent, setNewPostContent] = useState('');
   const [showNewPost, setShowNewPost] = useState(false);
   const [file, setFile] = useState(null);
-  const [commentContent, setCommentContent] = useState('');
+  const [commentInputs, setCommentInputs] = useState({});
   const [activeCommentPost, setActiveCommentPost] = useState(null);
   const [showLikes, setShowLikes] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [nextIndex, setNextIndex] = useState(0);
-  const {token}=useSelector(state=>state.auth)
-  const {user}=useSelector(state=>state.profile)
+  const [showMenu, setShowMenu] = useState(null);
+  const {user} = useSelector(state => state.profile);
    
   // Fetch posts on component mount
   useEffect(() => {
- 
     fetchPosts();
   }, []);
 
@@ -28,27 +26,25 @@ const Post = () => {
     try {
       setLoading(true);
       
-      
       let response = await fetch(`${process.env.REACT_APP_BASE_URL}/getposts?startIndex=${nextIndex}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        });
+      });
        
-        response=await response.json();
+      response = await response.json();
        
-        if(response.success){
-      setPosts(prev => [...prev, ...response.posts]);
-      setHasMore(response.hasMore);
-      setNextIndex(response.nextIndex);
-      setLoading(false);
-        }
-        else{
-          setLoading(false);
-        }
+      if(response.success){
+        setPosts(prev => [...prev, ...response.posts]);
+        setHasMore(response.hasMore);
+        setNextIndex(response.nextIndex);
+        setLoading(false);
+      }
+      else{
+        setLoading(false);
+      }
     } catch (error) {
-      
       setLoading(false);
     }
   };
@@ -60,26 +56,22 @@ const Post = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body:JSON.stringify({token})
-        });
-   response=await response.json();
+      credentials:"include"
+      });
+      response = await response.json();
  
-
-  
- console.log(response);
-          
- if(response.success){
-      setPosts(posts.map(post => 
-        post._id === postId 
-          ? {
-              ...post,
-              likes: post.likes.find(like => like.user === user._id)
-                ? post.likes.filter(like => like.user !==  user._id)
-                : [...post.likes, { user:  user._id, userName: user.userName }]
-            }
-          : post
-      ));
-    }
+      if(response.success){
+        setPosts(posts.map(post => 
+          post._id === postId 
+            ? {
+                ...post,
+                likes: post.likes.find(like => like.user === user._id)
+                  ? post.likes.filter(like => like.user !==  user._id)
+                  : [...post.likes, { user: user._id, userName: user.userName }]
+              }
+            : post
+        ));
+      }
     } catch (error) {
       console.error('Error liking post:', error);
     }
@@ -94,62 +86,73 @@ const Post = () => {
   };
 
   const handleComment = async (postId) => {
-    if (commentContent.trim() === '') return;
-console.log("comment krunga");
+    if (!commentInputs[postId] || commentInputs[postId].trim() === '') return;
 
     try {
       let response = await fetch(`${process.env.REACT_APP_BASE_URL}/post/comment/${postId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`  // Send token in headers
+       
         },
-        body: JSON.stringify({ content: commentContent })  // Corrected payload
+        body: JSON.stringify({ content: commentInputs[postId] }),
+        credentials:'include'
       });
- response=await response.json();
-  console.log(response);
-  if(response.success){
-      // Update posts with new comment
-      setPosts(posts.map(post => 
-        post._id === postId 
-          ? {
-              ...post,
-              comments: [...post.comments, response.comment]
-            }
-          : post
-      ));
+      response = await response.json();
       
-      setCommentContent('');
-      setActiveCommentPost(null);
-    }
+      if(response.success){
+        // Update posts with new comment
+        setPosts(posts.map(post => 
+          post._id === postId 
+            ? {
+                ...post,
+                comments: [...post.comments, response.comment]
+              }
+            : post
+        ));
+        
+        // Clear just this post's comment
+        setCommentInputs(prev => ({
+          ...prev,
+          [postId]: ''
+        }));
+      }
     } catch (error) {
       console.error('Error commenting on post:', error);
     }
   };
 
+  const handleCommentInputChange = (postId, value) => {
+    setCommentInputs(prev => ({
+      ...prev,
+      [postId]: value
+    }));
+  };
+
+  const discardComment = (postId) => {
+    setCommentInputs(prev => ({
+      ...prev,
+      [postId]: ''
+    }));
+  };
+
   const handleDeletePost = async (postId) => {
-    try { 
-    
-      
+    try {
       let response = await fetch(`${process.env.REACT_APP_BASE_URL}/post/${postId}`, {
         method: "DELETE", 
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`  
-        }
+          
+        },
+        credentials:'include'
       });
       
-      response=await response.json();
-      // if(nextIndex!=0)nextIndex--;
-      // if(posts.length-1==0){
-      //   fetchPosts();
-      // }
+      response = await response.json();
 
       if(response.success){
-        // setNextIndex(0);
-      setPosts(posts.filter(post => post._id !== postId));
+        setPosts(posts.filter(post => post._id !== postId));
       }
-
+      setShowMenu(null);
     } catch (error) {
       console.error('Error deleting post:', error);
     }
@@ -167,32 +170,47 @@ console.log("comment krunga");
       if (file) {
         formData.append('media', file);
       }
-      formData.append("token",token);
+      
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/post`, {
         method: "POST",
         body: formData, 
-    });
-    const result = await response.json();
-    console.log(result);
-    
-    if(result.success){
-      setPosts([result.newPost, ...posts]);
-      setNewPostContent('');
-      // setNextIndex(0);
-      setShowNewPost(false);
-      setFile(null);
+        credentials:'include'
+      });
+      const result = await response.json();
       
-    }
+      if(result.success){
+        setPosts([result.newPost, ...posts]);
+        setNewPostContent('');
+        setShowNewPost(false);
+        setFile(null);
+      }
     } catch (error) {
       console.error('Error creating post:', error);
     }
   };
 
   const isUserPost = (post) => {
-    return post.user ===user._id;
+    return post.user === user._id;
   };
+
+  const togglePostMenu = (postId) => {
+    setShowMenu(showMenu === postId ? null : postId);
+  };
+
+  // Click outside to close menus
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowMenu(null);
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 min-h-screen p-4">
+    <div className="bg-gradient-to-br  from-slate-950 via-indigo-950 to-slate-950 min-h-screen p-4 mt-[60px] sm:mt-[70px]">
       {/* New Post Button */}
       <div className="fixed bottom-6 right-6 z-10">
         <button 
@@ -260,8 +278,8 @@ console.log("comment krunga");
       
       {/* Posts List */}
       <div className="max-w-2xl mx-auto space-y-6">
-        {posts.map((post,index) => (
-          <div key={index} className="bg-slate-900 rounded-lg shadow-lg overflow-hidden">
+        {posts.map((post, index) => (
+          <div key={index} className="bg-slate-900/50 rounded-lg shadow-lg overflow-hidden">
             {/* Post Header */}
             <div className="px-4 py-3 border-b border-slate-800 flex justify-between items-center">
               <div className="flex items-center">
@@ -272,13 +290,33 @@ console.log("comment krunga");
                   <h3 className="text-white font-semibold">{post.userName}</h3>
                 </div>
               </div>
+              
+              {/* Three-dot menu for post actions */}
               {isUserPost(post) && (
-                <button
-                  onClick={() => handleDeletePost(post._id)}
-                  className="text-gray-400 hover:text-red-500"
-                >
-                  <AiOutlineClose size={20} />
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePostMenu(post._id);
+                    }}
+                    className="text-gray-400 hover:text-white p-1"
+                  >
+                    <FaEllipsisV size={18} />
+                  </button>
+                  
+                  {/* Post actions dropdown */}
+                  {showMenu === post._id && (
+                    <div className="absolute right-0 mt-1 w-32 bg-slate-800 rounded-lg shadow-lg overflow-hidden z-10">
+                      <button
+                        onClick={() => handleDeletePost(post._id)}
+                        className="w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700 flex items-center"
+                      >
+                        <AiOutlineClose size={16} className="mr-2" />
+                        Delete Post
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             
@@ -320,13 +358,13 @@ console.log("comment krunga");
               {/* Like and Comment Buttons */}
               <div className="flex justify-around border-t border-b border-slate-800 py-2">
                 <button 
-                  className="flex items-center space-x-1 text-gray-400 hover:text-indigo-400"
+                  className="flex items-center space-x-1 text-gray-400 hover:text-indigo-400 transition-all duration-200"
                   onClick={() => handleLike(post._id)}
                 >
                   {post.likes.some(like => like.user === user._id) ? (
-                    <FaHeart className="text-red-500" />
+                    <FaHeart className="text-red-500 transform scale-110 transition-transform duration-200" />
                   ) : (
-                    <FaRegHeart />
+                    <FaRegHeart className="transition-transform duration-200" />
                   )}
                   <span>Like</span>
                 </button>
@@ -373,22 +411,33 @@ console.log("comment krunga");
                       type="text"
                       className="flex-grow bg-slate-800 text-white rounded px-3 py-2"
                       placeholder="Write a comment..."
-                      value={commentContent}
-                      onChange={(e) => setCommentContent(e.target.value)}
+                      value={commentInputs[post._id] || ''}
+                      onChange={(e) => handleCommentInputChange(post._id, e.target.value)}
                     />
-                    <button
-                      onClick={() => handleComment(post._id)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white rounded px-3 py-1"
-                    >
-                      Post
-                    </button>
+                    <div className="flex space-x-1">
+                      {commentInputs[post._id] && (
+                        <button
+                          onClick={() => discardComment(post._id)}
+                          className="bg-gray-600 hover:bg-gray-700 text-white rounded px-3 py-1"
+                        >
+                          Discard
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleComment(post._id)}
+                        className={`bg-indigo-600 hover:bg-indigo-700 text-white rounded px-3 py-1 ${!commentInputs[post._id] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={!commentInputs[post._id]}
+                      >
+                        Post
+                      </button>
+                    </div>
                   </div>
                   
-                  {/* Comments list */}
+                  {/* Comments list with improved borders */}
                   {post.comments.length > 0 && (
                     <div className="max-h-60 overflow-y-auto space-y-2">
                       {post.comments.map((comment, idx) => (
-                        <div key={idx} className="bg-slate-800 rounded p-3">
+                        <div key={idx} className="bg-slate-800 rounded p-3 border-l-4 border-indigo-500">
                           <div className="flex items-center mb-1">
                             <div className="w-6 h-6 rounded-full bg-indigo-700 flex items-center justify-center">
                               <span className="text-white text-xs font-bold">{comment.userName?.charAt(0)}</span>
