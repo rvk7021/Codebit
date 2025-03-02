@@ -6,11 +6,11 @@ require('dotenv').config();
 
 exports.signup = async (req, res) => {
   try {
-    const {userName, firstName, lastName, email, password, college } = req.body;
-  
-    console.log(userName, firstName, lastName, email, password,college);
-    
-    if (!userName||!firstName || !lastName || !email || !password ||!college) {
+    const { userName, firstName, lastName, email, password, college } = req.body;
+
+    console.log(userName, firstName, lastName, email, password, college);
+
+    if (!userName || !firstName || !lastName || !email || !password || !college) {
       return res.status(400).json({
         success: false,
         message: "All fields required",
@@ -34,12 +34,12 @@ exports.signup = async (req, res) => {
       lastName,
       password: hashPassword,
       email,
-      role:"student",
+      role: "student",
       college
     });
 
-  
-  return res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       message: 'User signup successful',
     });
@@ -55,10 +55,10 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
- console.log("API CALLED");
- console.log(email,password);
- 
-  
+    console.log("API CALLED");
+    console.log(email, password);
+
+
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -77,11 +77,11 @@ exports.login = async (req, res) => {
 
     if (await bcrypt.compare(password, user.password)) {
       const token = jwt.sign(
-        { email: user.email, id: user._id,userName:user.userName, role: user.role },
+        { email: user.email, id: user._id, userName: user.userName, role: user.role },
         process.env.JWT_SECRET,
         {
           expiresIn: "24h",
-        } 
+        }
       )
 
       // Save token to user document in database
@@ -89,13 +89,13 @@ exports.login = async (req, res) => {
       user.password = undefined
       // Set cookie for token and return success response
       // httpOnly: This ensures that the cookie cannot be accessed via JavaScript (helps prevent cross-site scripting attacks).
-      
+
       const options = {
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure:false,
-        sameSite:"lax"
-       
+        secure: false,
+        sameSite: "lax"
+
       }
       res.cookie("token", token, options).status(200).json({
         success: true,
@@ -124,7 +124,7 @@ exports.getAllUserDetails = async (req, res) => {
   try {
     const id = req.user.id
     const userDetails = await User.findById(id)
-   
+
     res.status(200).json({
       success: true,
       message: "User Data fetched successfully",
@@ -157,75 +157,174 @@ exports.logout = (req, res) => {
   res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "lax" });
   return res.status(200).json({ success: true, message: "Logged out successfully" });
 };
+
 exports.updateProfile = async (req, res) => {
- try {
-   const userId=req.user.id;
-   
-   const {bio,country}=req.body;
-   const file = req.files?.file;
-   if(!file&&!bio&&!country){
-     return res.status(400).json({ success: false, message: "Fill Some Details" });
-   } 
-   const user=await User.findById(userId);
-   if(file){
-    const uploadedMedia = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-          { resource_type: "image", folder: "profile" }, 
-          (error, result) => {
-              if (error) return reject(error);
-              resolve(result);
-          }
-      );
-      stream.end(file.data);
-  });
-  const url=uploadedMedia.secure_url;
- if(user.profilePic){
-
-  await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split('.')[0]);
-  user.profilePic=url;
-
- }
-}
-if(bio){
-  user.bio=bio;
-}
-if(country){
-  user.Country=country;
-}
-await user.save();
- 
-return res.status(200).json({ success: true, message: "Profile updated successfully" ,user});
-}
-  catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
- }
-};
-exports.addSocialMediaAccount = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { platform, username } = req.body;
+    const userId = "67c45174ed455a61c24d2178";
+    console.log
+    const { bio, country, firstName, lastName } = req.body;
+    const file = req.files?.file;
+
+    if (!file && !bio && !country && !firstName && !lastName) {
+      return res.status(400).json({ success: false, message: "Fill Some Details" });
+    }
+
     const user = await User.findById(userId);
 
+    if (file) {
+      const uploadedMedia = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image", folder: "profile" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        stream.end(file.data);
+      });
+
+      const url = uploadedMedia.secure_url;
+      if (user.profilePic) {
+        await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split('.')[0]);
+      }
+      user.profilePic = url;
+    }
+
+    if (bio) {
+      user.bio = bio;
+    }
+
+    if (country) {
+      user.Country = country;
+    }
+
+    if (firstName) {
+      user.firstName = firstName;
+    }
+
+    if (lastName) {
+      user.lastName = lastName;
+    }
+
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "Profile updated successfully", user });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.addSocialMediaAccount = async (req, res) => {
+  try {
+    const userId = "67c45174ed455a61c24d2178"; // Replace with actual user ID in production
+    const { platform, username } = req.body;
+
+    // Validate platform
+    const validPlatforms = ["linkedin", "twitter", "instagram"];
+    if (!validPlatforms.includes(platform)) {
+      return res.status(400).json({ success: false, message: "Invalid platform" });
+    }
+
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-   
-    const existingAccount = user.SocialMedia.find(acc => acc.platform === platform);
-
-    if (existingAccount) {
-    
-      existingAccount.username = username;
+    // Remove empty or null values before adding
+    if (!username || username.trim() === "") {
+      delete user.SocialMedia[platform]; // Remove platform if username is empty
     } else {
-      
-      user.SocialMedia.push({ platform, username });
+      user.SocialMedia[platform] = username.trim(); // Add new username
     }
 
     await user.save();
-    return res.status(200).json({ success: true, message: "Social media account updated successfully" });
+    return res.status(200).json({ success: true, message: `${platform} updated successfully!` });
 
   } catch (error) {
     console.error("Error adding social media account:", error);
     return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
+
+
+
+// Get & Add Coding Profile
+exports.getCodingProfile = async (req, res) => {
+  try {
+    const userId = "67c45174ed455a61c24d2178"; // Replace with actual user ID in production
+    const { LeetCode, Codeforces, CodeChef } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    if (!(LeetCode || Codeforces || CodeChef)) {
+      return res.status(400).json({ success: false, message: "Please provide a platform name" });
+    }
+    if (LeetCode) user.codingProfile.LeetCode = LeetCode;
+    if (Codeforces) user.codingProfile.Codeforces = Codeforces;
+    if (CodeChef) user.codingProfile.CodeChef = CodeChef;
+
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "Coding profile updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// Remove Coding Profile
+exports.removeCodingProfile = async (req, res) => {
+  try {
+    const userId = "67c45174ed455a61c24d2178"; // Replace with actual user ID in production
+    const { platform } = req.body;
+
+    // Validate platform name
+    const validPlatforms = ["LeetCode", "Codeforces", "CodeChef"];
+    if (!validPlatforms.includes(platform)) {
+      return res.status(400).json({ success: false, message: "Invalid platform name" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Check if the platform is already empty
+    if (!user.codingProfile[platform]) {
+      return res.status(400).json({ success: false, message: `${platform} first add a profile` });
+    }
+
+    // Remove profile by setting it to null
+    user.codingProfile[platform] = null;
+    await user.save();
+
+    return res.status(200).json({ success: true, message: `${platform} profile removed successfully` });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+
+// add the githubprofile section
+
+exports.addGithubProfile = async (req, res) => {
+  const user_id = "67c45174ed455a61c24d2178";
+  try {
+    const { githubProfile } = req.body;
+    if (!githubProfile) {
+      return res.status(400).json({ success: false, message: "Please provide a github profile" });
+    }
+    const user = await User.findById(user_id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    user.githubProfile = githubProfile;
+    await user.save();
+    return res.status(200).json({ success: true, message: "Github profile added successfull" });
+
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to add github" });
+  }
+}

@@ -25,9 +25,10 @@ function App() {
           method: "GET",
           credentials: "include", 
         });
-
+          
         const data = await response.json();
         if (data.success) {
+          console.log("User fetched successfully");
           console.log(data.user);
           
           dispatch(setUser(data.user));

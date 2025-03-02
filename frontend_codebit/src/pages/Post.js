@@ -15,8 +15,8 @@ const Post = () => {
   const [hasMore, setHasMore] = useState(false);
   const [nextIndex, setNextIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(null);
-  const {user} = useSelector(state => state.profile);
-   
+  const { user } = useSelector(state => state.profile);
+
   // Fetch posts on component mount
   useEffect(() => {
     fetchPosts();
@@ -25,23 +25,23 @@ const Post = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      
+
       let response = await fetch(`${process.env.REACT_APP_BASE_URL}/getposts?startIndex=${nextIndex}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
-       
+
       response = await response.json();
-       
-      if(response.success){
+
+      if (response.success) {
         setPosts(prev => [...prev, ...response.posts]);
         setHasMore(response.hasMore);
         setNextIndex(response.nextIndex);
         setLoading(false);
       }
-      else{
+      else {
         setLoading(false);
       }
     } catch (error) {
@@ -56,19 +56,19 @@ const Post = () => {
         headers: {
           "Content-Type": "application/json",
         },
-      credentials:"include"
+        credentials: "include"
       });
       response = await response.json();
- 
-      if(response.success){
-        setPosts(posts.map(post => 
-          post._id === postId 
+
+      if (response.success) {
+        setPosts(posts.map(post =>
+          post._id === postId
             ? {
-                ...post,
-                likes: post.likes.find(like => like.user === user._id)
-                  ? post.likes.filter(like => like.user !==  user._id)
-                  : [...post.likes, { user: user._id, userName: user.userName }]
-              }
+              ...post,
+              likes: post.likes.find(like => like.user === user._id)
+                ? post.likes.filter(like => like.user !== user._id)
+                : [...post.likes, { user: user._id, userName: user.userName }]
+            }
             : post
         ));
       }
@@ -93,24 +93,24 @@ const Post = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-       
+
         },
         body: JSON.stringify({ content: commentInputs[postId] }),
-        credentials:'include'
+        credentials: 'include'
       });
       response = await response.json();
-      
-      if(response.success){
+
+      if (response.success) {
         // Update posts with new comment
-        setPosts(posts.map(post => 
-          post._id === postId 
+        setPosts(posts.map(post =>
+          post._id === postId
             ? {
-                ...post,
-                comments: [...post.comments, response.comment]
-              }
+              ...post,
+              comments: [...post.comments, response.comment]
+            }
             : post
         ));
-        
+
         // Clear just this post's comment
         setCommentInputs(prev => ({
           ...prev,
@@ -139,17 +139,17 @@ const Post = () => {
   const handleDeletePost = async (postId) => {
     try {
       let response = await fetch(`${process.env.REACT_APP_BASE_URL}/post/${postId}`, {
-        method: "DELETE", 
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          
+
         },
-        credentials:'include'
+        credentials: 'include'
       });
-      
+
       response = await response.json();
 
-      if(response.success){
+      if (response.success) {
         setPosts(posts.filter(post => post._id !== postId));
       }
       setShowMenu(null);
@@ -160,25 +160,25 @@ const Post = () => {
 
   const handleSubmitPost = async (e) => {
     e.preventDefault();
-    
+
     if (!newPostContent && !file) return;
-    
+
     try {
       const formData = new FormData();
       formData.append('content', newPostContent);
-      
+
       if (file) {
         formData.append('media', file);
       }
-      
+
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/post`, {
         method: "POST",
-        body: formData, 
-        credentials:'include'
+        body: formData,
+        credentials: 'include'
       });
       const result = await response.json();
-      
-      if(result.success){
+
+      if (result.success) {
         setPosts([result.newPost, ...posts]);
         setNewPostContent('');
         setShowNewPost(false);
@@ -202,7 +202,7 @@ const Post = () => {
     const handleClickOutside = () => {
       setShowMenu(null);
     };
-    
+
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
@@ -213,7 +213,7 @@ const Post = () => {
     <div className="bg-gradient-to-br  from-slate-950 via-indigo-950 to-slate-950 min-h-screen p-4 mt-[60px] sm:mt-[70px]">
       {/* New Post Button */}
       <div className="fixed bottom-6 right-6 z-10">
-        <button 
+        <button
           onClick={() => setShowNewPost(!showNewPost)}
           className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-3 shadow-lg"
         >
@@ -275,7 +275,7 @@ const Post = () => {
           </div>
         </div>
       )}
-      
+
       {/* Posts List */}
       <div className="max-w-2xl mx-auto space-y-6">
         {posts.map((post, index) => (
@@ -290,7 +290,7 @@ const Post = () => {
                   <h3 className="text-white font-semibold">{post.userName}</h3>
                 </div>
               </div>
-              
+
               {/* Three-dot menu for post actions */}
               {isUserPost(post) && (
                 <div className="relative">
@@ -303,7 +303,7 @@ const Post = () => {
                   >
                     <FaEllipsisV size={18} />
                   </button>
-                  
+
                   {/* Post actions dropdown */}
                   {showMenu === post._id && (
                     <div className="absolute right-0 mt-1 w-32 bg-slate-800 rounded-lg shadow-lg overflow-hidden z-10">
@@ -319,11 +319,11 @@ const Post = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Post Content */}
             <div className="p-4">
               <p className="text-white mb-3">{post.content}</p>
-              
+
               {/* Media Display */}
               {post.media && post.media.length > 0 && (
                 <div className="mb-3">
@@ -338,26 +338,26 @@ const Post = () => {
                   ))}
                 </div>
               )}
-              
+
               {/* Like and Comment Counts */}
               <div className="flex justify-between items-center text-gray-400 text-sm mt-2 mb-3">
-                <button 
+                <button
                   className="flex items-center hover:text-gray-300"
                   onClick={() => handleShowLikes(post._id)}
                 >
                   <span>{post.likes.length} likes</span>
                 </button>
-                <button 
+                <button
                   className="flex items-center hover:text-gray-300"
                   onClick={() => setActiveCommentPost(activeCommentPost === post._id ? null : post._id)}
                 >
                   <span>{post.comments.length} comments</span>
                 </button>
               </div>
-              
+
               {/* Like and Comment Buttons */}
               <div className="flex justify-around border-t border-b border-slate-800 py-2">
-                <button 
+                <button
                   className="flex items-center space-x-1 text-gray-400 hover:text-indigo-400 transition-all duration-200"
                   onClick={() => handleLike(post._id)}
                 >
@@ -368,7 +368,7 @@ const Post = () => {
                   )}
                   <span>Like</span>
                 </button>
-                <button 
+                <button
                   className="flex items-center space-x-1 text-gray-400 hover:text-indigo-400"
                   onClick={() => setActiveCommentPost(activeCommentPost === post._id ? null : post._id)}
                 >
@@ -376,13 +376,13 @@ const Post = () => {
                   <span>Comment</span>
                 </button>
               </div>
-              
+
               {/* Likes Modal */}
               {showLikes === post._id && post.likes.length > 0 && (
                 <div className="mt-3 bg-slate-800 rounded p-3">
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="text-white font-semibold">Likes</h4>
-                    <button 
+                    <button
                       onClick={() => setShowLikes(null)}
                       className="text-gray-400 hover:text-white"
                     >
@@ -401,7 +401,7 @@ const Post = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Comments Section */}
               {activeCommentPost === post._id && (
                 <div className="mt-3">
@@ -432,7 +432,7 @@ const Post = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Comments list with improved borders */}
                   {post.comments.length > 0 && (
                     <div className="max-h-60 overflow-y-auto space-y-2">
@@ -454,7 +454,7 @@ const Post = () => {
             </div>
           </div>
         ))}
-        
+
         {/* Load More Button */}
         {hasMore && (
           <div className="text-center py-4">
@@ -467,7 +467,7 @@ const Post = () => {
             </button>
           </div>
         )}
-        
+
         {posts.length === 0 && !loading && (
           <div className="text-center py-10">
             <p className="text-gray-400">No posts yet. Be the first to post!</p>

@@ -8,7 +8,7 @@ const {fetchUpcomingContestAPI,getAllContests}=require('../controllers/contest')
 const {executeCode}=require('../controllers/compiler')
 const {Leaderboard}=require('../controllers/leaderBoard');
 const {auth }=require('../middleware/auth');
-const {getAllUserDetails,getUser,logout,updateProfile,addSocialMediaAccount}=require('../controllers/auth');
+const {getAllUserDetails,getUser,logout,updateProfile,addSocialMediaAccount,addGithubProfile,getCodingProfile,removeCodingProfile}=require('../controllers/auth');
 const {submitCode,getUserSubmissions,runCode}=require('../controllers/submission');
 const {addPost,likeUnlikePost,deletePost,getFeedPosts,getUserPosts,addComment,getComments}=require('../controllers/post');
 const {fetchCodeChefRating,fetchCodeforcesRating,fetchLeetCodeRating}=require('../controllers/rating');
@@ -18,11 +18,14 @@ router.post('/login',login);
 router.post('/signup',signup);
 router.post('/logout', auth, logout);
 router.get('/getUser',auth,getUser);
-router.post('/uploadProfile',auth,updateProfile);
-router.post('/addsocialmedia',auth,addSocialMediaAccount);
+router.post('/uploadProfile',updateProfile);
+router.post('/addsocialmedia',addSocialMediaAccount);
 router.get('/fetchcodeforcesrating/:username',auth,fetchCodeforcesRating);
 router.get('/fetchcodechefrating/:username',auth,fetchCodeChefRating);
 router.get('/fetchleetcoderating/:username',auth,fetchLeetCodeRating);
+router.post('/getcodingprofile',getCodingProfile);
+router.post('/addgithub',addGithubProfile);
+router.delete('/removecodingprofile',removeCodingProfile);
 // problem routes
 router.post('/problems',checkProblem,addProblem);
 router.get('/problems/search',searchproblem);

@@ -116,7 +116,7 @@ export default function Contest() {
   
   if (error) return (
     <motion.div 
-      className="bg-slate-900 border border-red-500 rounded-md p-4 my-4 max-w-2xl mx-auto"
+      className="bg-slate-900 border h-screen border-red-500 rounded-md p-4 my-4 max-w-2xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -141,7 +141,7 @@ export default function Contest() {
   };
 
   return (
-    <div className="mx-auto mt-[50px] bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 px-4 py-8">
+    <div className="mx-auto mt-[50px] h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 px-4 py-8">
       <motion.h1 
         ref={mainRef}
         initial="hidden"

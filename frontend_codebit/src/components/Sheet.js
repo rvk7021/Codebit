@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 export const Sheet = () => {
   const [loading, setLoading] = useState(true);
@@ -18,8 +18,8 @@ export const Sheet = () => {
   const [confirmationData, setConfirmationData] = useState(null);
   const [groupNameInput, setGroupNameInput] = useState('');
   const [showGroupNameInput, setShowGroupNameInput] = useState(false);
-  
-  const navigate=useNavigate();
+
+  const navigate = useNavigate();
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const problemsPerPage = 12;
@@ -191,7 +191,7 @@ export const Sheet = () => {
       if (data.success) {
         setProblems((prev) => prev.filter((problem) => problem._id !== problemId));
         showNotificationMessage('success', `Problem '${problemTitle}' deleted successfully`);
-        
+
         // Adjust current page if needed after deletion
         const remainingProblems = problems.filter(problem => problem._id !== problemId).length;
         const totalPages = Math.ceil(remainingProblems / problemsPerPage);
@@ -262,8 +262,8 @@ export const Sheet = () => {
       setLoading(false);
     }
   };
-  
-  const handleAddProblem= async ()=>{
+
+  const handleAddProblem = async () => {
     navigate('/problem-set');
   }
 
@@ -346,7 +346,7 @@ export const Sheet = () => {
             Problem Sheet Dashboard
           </h1>
           {sheet && (
-            <button 
+            <button
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-md transition-all flex items-center"
               onClick={initiateDeleteSheet}
             >
@@ -358,16 +358,14 @@ export const Sheet = () => {
           )}
         </div>
       </div>
-      
+
       {/* Notification */}
       {showNotification && (
-        <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-500 ease-in-out z-50 ${
-          notificationType === 'success' ? 'bg-green-600' : 'bg-red-600'
-        }`}>
+        <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-500 ease-in-out z-50 ${notificationType === 'success' ? 'bg-green-600' : 'bg-red-600'
+          }`}>
           <div className="flex items-center">
-            <div className={`w-8 h-8 mr-4 rounded-full flex items-center justify-center ${
-              notificationType === 'success' ? 'bg-green-500' : 'bg-red-500'
-            }`}>
+            <div className={`w-8 h-8 mr-4 rounded-full flex items-center justify-center ${notificationType === 'success' ? 'bg-green-500' : 'bg-red-500'
+              }`}>
               {notificationType === 'success' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -394,13 +392,13 @@ export const Sheet = () => {
               {confirmationAction === 'deleteProblem' && `Are you sure you want to delete the problem "${confirmationData.title}"?`}
             </p>
             <div className="flex justify-end space-x-4">
-              <button 
+              <button
                 className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
                 onClick={() => setShowConfirmation(false)}
               >
                 Cancel
               </button>
-              <button 
+              <button
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
                 onClick={handleConfirmAction}
               >
@@ -433,7 +431,7 @@ export const Sheet = () => {
             </svg>
             <h2 className="text-xl font-semibold mb-4 text-center">You don't have a sheet yet</h2>
             <p className="text-gray-400 mb-8 text-center max-w-md">Create a sheet to start organizing your problems into groups</p>
-            <button 
+            <button
               className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white px-6 py-3 rounded-lg shadow-lg transition-all flex items-center"
               onClick={handleCreateSheet}
             >
@@ -503,13 +501,13 @@ export const Sheet = () => {
                         <div key={index} className={`bg-gray-700 bg-opacity-60 border border-gray-600 rounded-lg p-3 flex justify-between items-center ${selectedGroup === group ? 'ring-2 ring-indigo-500' : ''}`}>
                           <h3 className="text-md font-medium truncate">{group}</h3>
                           <div className="flex space-x-2 shrink-0">
-                            <button 
+                            <button
                               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm"
                               onClick={() => handleProblemsInGroup(group)}
                             >
                               View
                             </button>
-                            <button 
+                            <button
                               className="bg-gray-600 hover:bg-red-600 text-white p-1 rounded-lg text-sm flex items-center"
                               onClick={() => initiateDeleteGroup(group)}
                             >
@@ -538,18 +536,18 @@ export const Sheet = () => {
                       <h2 className="text-xl font-semibold text-indigo-300">
                         Problems in {selectedGroup}
                       </h2>
-                      <button 
-                      onClick={() =>{
-                        handleAddProblem();
-                      }}
-                      className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-md transition-all flex items-center">
+                      <button
+                        onClick={() => {
+                          handleAddProblem();
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-md transition-all flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                         </svg>
                         Add Problem
                       </button>
                     </div>
-                    
+
                     {problems.length > 0 ? (
                       <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -562,7 +560,7 @@ export const Sheet = () => {
                                 </span>
                               </div>
                               <p className="text-gray-300 mt-2 text-sm line-clamp-2">{problem.description}</p>
-                              
+
                               <div className="flex flex-wrap gap-2 mt-3">
                                 {problem.tags.slice(0, 3).map((tag, tagIndex) => (
                                   <span key={tagIndex} className="bg-indigo-900 bg-opacity-60 text-indigo-200 px-2 py-1 rounded-full text-xs">
@@ -575,7 +573,7 @@ export const Sheet = () => {
                                   </span>
                                 )}
                               </div>
-                              
+
                               <div className="flex justify-between mt-4">
                                 <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-xs shadow-md transition-all">
                                   View Details
@@ -585,14 +583,14 @@ export const Sheet = () => {
                                   onClick={() => initiateDeleteProblem(problem._id, problem.title)}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                                   </svg>
                                 </button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        
+
                         {/* Pagination */}
                         {totalPages > 1 && (
                           <div className="flex justify-center mt-6">
@@ -600,39 +598,36 @@ export const Sheet = () => {
                               <button
                                 onClick={() => paginate(Math.max(1, currentPage - 1))}
                                 disabled={currentPage === 1}
-                                className={`px-3 py-1 rounded-md ${
-                                  currentPage === 1
+                                className={`px-3 py-1 rounded-md ${currentPage === 1
                                     ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
                                     : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                                }`}
+                                  }`}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                   <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
                               </button>
-                              
+
                               {[...Array(totalPages)].map((_, i) => (
                                 <button
                                   key={i}
                                   onClick={() => paginate(i + 1)}
-                                  className={`px-3 py-1 rounded-md ${
-                                    currentPage === i + 1
+                                  className={`px-3 py-1 rounded-md ${currentPage === i + 1
                                       ? 'bg-indigo-700 text-white'
                                       : 'bg-gray-700 hover:bg-gray-600 text-white'
-                                  }`}
+                                    }`}
                                 >
                                   {i + 1}
                                 </button>
                               ))}
-                              
+
                               <button
                                 onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
                                 disabled={currentPage === totalPages}
-                                className={`px-3 py-1 rounded-md ${
-                                  currentPage === totalPages
+                                className={`px-3 py-1 rounded-md ${currentPage === totalPages
                                     ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
                                     : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                                }`}
+                                  }`}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                   <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -666,7 +661,7 @@ export const Sheet = () => {
           </>
         )}
       </div>
-      
+
       {/* Footer */}
       <footer className="mt-16 text-center text-gray-500">
         <p>&copy; {new Date().getFullYear()} Problem Sheet Manager. All rights reserved.</p>

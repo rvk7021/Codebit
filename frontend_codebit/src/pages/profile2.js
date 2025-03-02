@@ -3,8 +3,11 @@ import { CiMail } from "react-icons/ci";
 import { MdOutlineLocationOn } from "react-icons/md";
 import { GiGraduateCap } from "react-icons/gi";
 import { SiLeetcode, SiCodeforces, SiCodechef } from "react-icons/si";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { FaEdit, FaPlus, FaMinus, FaTrash } from "react-icons/fa";
+import Swal from "sweetalert2";
+
 export default function Profile() {
   const user = useSelector((state) => state.user);
   console.log(user);
@@ -19,8 +22,7 @@ export default function Profile() {
     { topic: "Graph Theory", problemsSolved: 200, totalsolved: 500 },
   ];
 
-  
-  
+
   const temp = [
     {
       userName: "john_doe",
