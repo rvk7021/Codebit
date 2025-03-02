@@ -4,7 +4,7 @@ import { MdOutlineLocationOn } from "react-icons/md";
 import { GiGraduateCap } from "react-icons/gi";
 import { SiLeetcode, SiCodeforces, SiCodechef } from "react-icons/si";
 import { useState } from "react";
-
+import { useSelector } from "react-redux";
 export default function Profile() {
   const data = [
     { topic: "Dynamic Programming", problemsSolved: 152, totalsolved: 500 },
@@ -17,6 +17,8 @@ export default function Profile() {
     { topic: "Graph Theory", problemsSolved: 200, totalsolved: 500 },
   ];
 
+  
+  
   const temp = [
     {
       userName: "john_doe",

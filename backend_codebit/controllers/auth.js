@@ -144,10 +144,10 @@ exports.getUser = async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
+ const user= await User.findById(req.user.id);
     res.status(200).json({
       success: true,
-      user: req.user,
+      user
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });

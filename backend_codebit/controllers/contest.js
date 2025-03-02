@@ -20,32 +20,7 @@ const fetchUpcomingContest = async () => {
         const upcomingCodechefContests = codechefResponse.data.future_contests;
         const upcomingContestNames = new Set(upcomingCodeforcesContests.map((c) => c.name));
         const upcomingContestNamesChef = new Set(upcomingCodechefContests.map((c) => c.contest_name));
-        // const cns=[
-        //     {
-            
-        //       "name": "W-435",
-        //       "description": "All the best for the contest",
-        //       "startTime": "2025-02-02T08.00",
-        //       "duration": 1.5,
-        //         "link": "https://leetcode.com/contest/",
-        //       "platform": "LeetCode",
-            
-        //     },
-        //     {
-            
-        //         "name": "B-150",
-        //         "description": "All the best for the contest",
-        //         "startTime": "2025-02-15T20.00",
-        //         "duration": 1.5,
-        //           "link": "https://leetcode.com/contest/",
-        //         "platform": "LeetCode",
-              
-        //     }
-        //     ];
-        //     for(const cn of cns){
-        //         await Contest.create(cn);
-        //     }
-        // Cleanup outdated contests
+       
         for (const contest of contests) {
            
            
@@ -56,35 +31,8 @@ const fetchUpcomingContest = async () => {
                 await Contest.findByIdAndDelete(contest._id);
             }
 
-            if (contest.platform.toLowerCase() === "leetcode") {
-                const startTime = contest.startTime;
-                const startDate = new Date(startTime);
-                
-                
-                const currentTime = new Date();
-                const durationInHours = contest.duration;
-
-                const endDate = new Date(startDate.getTime() + durationInHours * 60 * 60 * 1000);
-              
-                
-                if (currentTime > endDate) {
-                  
-                    
-                      
-                    if (contest.name.split('-')[0] === 'W') {
-                        contest.name = 'W-' + (parseInt(contest.name.split('-')[1]) + 1);
-                        const newStartDate = new Date(startDate.getTime() + (7 * 24 * 60 * 60 * 1000));
-                        contest.startTime = formatStartDateToIST(newStartDate);
-                    } else {
-                        contest.name = 'B-' + (parseInt(contest.name.split('-')[1]) + 1);
-                        const newStartDate = new Date(startDate.getTime() + (14 * 24 * 60 * 60 * 1000));
-                        contest.startTime = formatStartDateToIST(newStartDate);
-                    }
-                    contest.notifiedUsers.registeredTime = [];
-                    contest.notifiedUsers.beforeDeadline = [];
-                    await contest.save();
-                }
-            }
+            
+            
         }
 
         for (const contest of upcomingCodeforcesContests) {
@@ -103,7 +51,7 @@ const fetchUpcomingContest = async () => {
             }
         }
 
-        // Fetch upcoming contests from Codechef
+    
         for (const contest of upcomingCodechefContests) {
             const existingContest = await Contest.findOne({ name: contest.contest_name });
             if (!existingContest) {
@@ -140,7 +88,7 @@ scheduleFetch();
 exports.fetchUpcomingContestAPI = async (req, res) => {
     try {
         await fetchUpcomingContest();
-        scheduleFetch(); // Reset the 15-minute timer
+        scheduleFetch(); 
         return res.status(200).json({
             success: true,
             message: "Contests fetched successfully",
@@ -156,30 +104,6 @@ exports.fetchUpcomingContestAPI = async (req, res) => {
     }
 };
 
-// Helper function to format start date to IST
-function formatStartDateToIST(input) {
-    // Determine if the input is a Date object or a timestamp in seconds
-    let date;
-    if (input instanceof Date) {
-        date = input;
-    } else if (typeof input === "number") {
-        // For Codeforces contests, the timestamp is in seconds
-        date = new Date(input * 1000);
-    } else {
-        // Fallback if the input is a valid date string already
-        date = new Date(input);
-    }
-
-    // Format date components with leading zeros if necessary
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    // Return a valid ISO 8601 datetime string using 'T' as the separator.
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
 
 exports.getAllContests=async(req,res)=>{
     try {

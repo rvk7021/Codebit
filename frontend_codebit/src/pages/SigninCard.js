@@ -45,7 +45,7 @@ export default function SigninCard() {
 
    
       const data = await response.json();
-   const user=data.user;
+  
       
       if (data.success === false) {
         setError(data.message);
@@ -54,16 +54,28 @@ export default function SigninCard() {
         
         return;
       } 
-
-  
-      dispatch(setUser(user ));
+    
+              const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getuser`, {
+                method: "GET",
+                credentials: "include", 
+              });
       
+              const resData = await res.json();
+              if (resData.success) {
+             console.log(resData.user);
+             
+                dispatch(setUser(resData.user));
       dispatch(setLoading(false));
 
       setError(null);
-  
+    
       navigate('/');
-    } catch (error) {
+    }
+    else{
+      dispatch(setLoading(false));
+      setError(resData.message);
+    }
+   } catch (error) {
       setError(error.message);
       console.log('Login Failed');
       

@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose")
 
 const userSchema = new mongoose.Schema(
@@ -68,7 +67,10 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
     activeDays: [{ type: String }],
-  
+    githubProfile:{
+      type:String,
+      default:null
+    },
     bio: {
       type: String
     },
@@ -86,28 +88,17 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    codingProfile: [{
-      profileName: {
-        type: String,
-        require: false
-      },
-      platform: {
-        type: String,
-        require: function() {
-          return this.profileName != null;
-        }
-      }
-    }],
-    SocialMedia: [{
-      platform: {
-        type: String,
-        require: false
-      },
-      username: {
-        type: String,
-        require: false
-      }
-    }],
+    codingProfile: {
+      LeetCode: { type: String, default: null },
+      Codeforces: { type: String, default: null },
+      CodeChef: { type: String, default: null }
+    },
+    SocialMedia: {
+      linkedin: { type: String, default: null },
+      twitter: { type: String, default: null },
+      instagram: { type: String, default: null }
+    },
+    
     Country:{
         type:String,
         default:"India"

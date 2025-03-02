@@ -9,7 +9,7 @@ const ContestSchema = new mongoose.Schema({
   platform: { type: String, required: true },
   notifiedUsers: { 
     registeredTime: { type: [String], default: [] },
-    beforeDeadline: { type: [String], default: [] }
+
   }
 });
   
