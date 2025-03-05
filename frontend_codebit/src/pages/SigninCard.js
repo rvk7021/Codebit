@@ -45,12 +45,19 @@ export default function SigninCard() {
         setError(data.message);
         dispatch(setLoading(false));
         return;
-      }
-
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getuser`, {
-        method: "GET",
-        credentials: "include",
-      });
+      } 
+    
+              const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getuser`, {
+                method: "GET",
+                credentials: "include", 
+              });
+      
+              const resData = await res.json();
+              if (resData.success) {
+             console.log(resData.user);
+             
+                dispatch(setUser(resData.user));
+      dispatch(setLoading(false));
 
       const resData = await res.json();
 

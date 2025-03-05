@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { cloudinary } = require('../config/cloudinary');
+const { cloudinary } = require('../config/cloudinary'); 
 require('dotenv').config();
 
 exports.signup = async (req, res) => {
@@ -55,7 +55,7 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("API CALLED");
+    console.log(email, password);
 
 
     if (!email || !password) {

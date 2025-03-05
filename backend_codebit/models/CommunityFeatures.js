@@ -63,7 +63,7 @@ const PostSchema = new mongoose.Schema({
     maxlength: 20
   }],
   likes: [{
-    user: { // Store user ID and username in likes
+    user: { 
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
@@ -73,7 +73,7 @@ const PostSchema = new mongoose.Schema({
       required: true
     }
   }],
-  comments: [CommentSchema], // Embedded comment schema
+  comments: [CommentSchema], 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

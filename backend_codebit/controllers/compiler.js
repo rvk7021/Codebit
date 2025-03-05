@@ -19,6 +19,8 @@ const filepath = await generateFile(language, code);
 
 
 const output=await executeCpp(filepath,input);
+console.log(output);
+
         return res.status(200).json({
             success: true,
             message: "Code executed successfully",
@@ -29,6 +31,8 @@ const output=await executeCpp(filepath,input);
             input
         });
     } catch (error) {
+        console.log(error);
+        
         return res.status(500).json({
             success: false, 
             message: "Error executing code",
