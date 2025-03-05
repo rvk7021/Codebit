@@ -141,7 +141,7 @@ export default function Contest() {
   };
 
   return (
-    <div className="mx-auto mt-[50px] h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 px-4 py-8">
+    <div className="mx-auto mt-[50px] min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 px-4 py-8">
       <motion.h1 
         ref={mainRef}
         initial="hidden"

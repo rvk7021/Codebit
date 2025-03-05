@@ -51,11 +51,12 @@ function App() {
          <Route path='contest' element={<ProtectedRoute><Contest/>  </ProtectedRoute> }/>
          <Route path='profile' element={ <ProtectedRoute><Profile/></ProtectedRoute> }/>
          <Route path='/problem-set' element={<ProblemSet/>}/>
+             <Route path='/sheet' element={    <Sheet />}/>
+
          <Route path='posts' element={<Post/>}></Route>
         </Route>
     <Route path='/sign-in' element={<SigninCard />}/>
     <Route path='/sign-up' element={<SignupCard />}/>
-    <Route path='/sheet' element={    <Sheet />}/>
     {/* <Route path='*' element={<h1>404 Not Found</h1>} /> */}
   </Routes>
   );

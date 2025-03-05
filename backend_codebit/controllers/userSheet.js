@@ -7,7 +7,7 @@ const Problem = require('../models/Problem');
 
 exports.CheckSheet = async (req, res) => {
   try {
-    let user = req.query.user?.trim();
+    let user = req.user.id;
     if (!user) {
       return res.status(400).json({
         message: "User ID is required",
@@ -39,7 +39,7 @@ exports.CheckSheet = async (req, res) => {
 
 exports.CreateSheet = async (req, res) => {
   try {
-    let user = req.query.user?.trim();
+    let user = req.user.id;
     console.log("User:", user);
     if (!user) {
       return res.status(400).json({
@@ -72,8 +72,9 @@ exports.CreateSheet = async (req, res) => {
 // Sheet Deletion API call
 exports.DeleteSheet = async (req, res) => {
   try {
-    let user = req.query.user?.trim();
-    if (!user) {
+    let user = req.user.id;
+    console.log("User:", user);
+      if (!user) {
       return res.status(400).json({
         message: "User ID is required",
         success: false
@@ -105,7 +106,7 @@ exports.DeleteSheet = async (req, res) => {
 // Group creation API call
 exports.CreateGroup = async (req, res) => {
   try {
-    const SheetData = await Sheet.findOne({ user: req.body.user });
+    const SheetData = await Sheet.findOne({ user: req.user.id});
 
     if (!SheetData) {
       return res.status(400).json({
@@ -173,7 +174,7 @@ exports.CreateGroup = async (req, res) => {
 // Delete group API call
 exports.DeleteGroup = async (req, res) => {
   try {
-    const SheetData = await Sheet.findOne({ user: req.body.user });
+    const SheetData = await Sheet.findOne({ user: req.user.id });
 
     if (!SheetData) {
       return res.status(400).json({
@@ -239,7 +240,7 @@ exports.DeleteGroup = async (req, res) => {
 exports.ShowAllGroups = async (req, res) => {
   try {
     let query={};
-    query.user=req.query.user?.trim();
+    query.user=req.user.id;
     // Fetch the sheet data for the user
     const SheetData = await Sheet.findOne(query);
     // Handle case where the sheet is not found
@@ -273,7 +274,7 @@ exports.ShowAllGroups = async (req, res) => {
 exports.AddProblemToGroup = async (req, res) => {
   try {
     const SheetData = await Sheet.findOne({
-      user: req.body.user
+      user: req.user.id
     });
 
     if (!SheetData) {
@@ -357,7 +358,8 @@ exports.AddProblemToGroup = async (req, res) => {
 // Remove problem from group API call
 exports.RemoveProblemFromGroup = async (req, res) => {
   try {
-    const { user, groupName, problemId } = req.body;
+    const user = req.user.id;
+    const {groupName, problemId } = req.body;
 
     // Find the sheet by user
     const sheet = await Sheet.findOne({ user });
@@ -415,7 +417,7 @@ exports.RemoveProblemFromGroup = async (req, res) => {
 // Show problems in group API call
 exports.ShowProblemsInGroup = async (req, res) => {
   try {
-    const user = req.query.user?.trim();
+    let user = req.user.id;
     const groupName = req.query.groupName?.trim();
     console.log("User:", user);
     console.log("Group:", groupName);

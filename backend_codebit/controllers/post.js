@@ -228,5 +228,37 @@ exports.getUserPosts = async (req, res) => {
     }
 };
 
+exports.getLatestPosts = async (req, res) => {
+    try {
+        const latestPosts = await Post.find()
+            .sort({ createdAt: -1 }) 
+            .limit(4); 
+
+        if (latestPosts.length === 0) {
+            return res.status(404).json({ success: false, message: "No posts found" });
+        }
+
+        const formattedPosts = latestPosts.map((post, index) => ({
+            id: post._id,
+            title: post.content.substring(0, 50) + (post.content.length > 50 ? "..." : ""), // Generate title from content
+            excerpt: post.content.substring(0, 100) + (post.content.length > 100 ? "..." : ""), // Short description
+            author: post.userName,
+            authorAvatar: post.userName.charAt(0).toUpperCase(), // First letter as avatar
+            date: new Date(post.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+            }),
+            image: post.media.length > 0 ? post.media[0].type : "DefaultImage", // Use media type if available
+            likes: post.likes.length,
+            comments: post.comments.length,
+        }));
+
+        res.status(200).json({ success: true, posts: formattedPosts });
+    } catch (error) {
+        console.error("Error fetching latest posts:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
 
 

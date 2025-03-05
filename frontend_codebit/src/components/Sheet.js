@@ -24,7 +24,7 @@ export const Sheet = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const problemsPerPage = 12;
 
-  const user = "67b763880f46dda593091732";
+  const user = "check";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +36,7 @@ export const Sheet = () => {
 
         const queryParams = new URLSearchParams({ user }).toString();
         const sheetUrl = `${process.env.REACT_APP_BASE_URL}/sheet/check?${queryParams}`;
-        const sheetResponse = await fetch(sheetUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+        const sheetResponse = await fetch(sheetUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' },credentials :'include' });
 
         if (!sheetResponse.ok) {
           throw new Error((await sheetResponse.json()).message || "Something went wrong");
@@ -48,7 +48,7 @@ export const Sheet = () => {
         if (sheetData.success) {
           setFetchingOperation('groups');
           const groupsUrl = `${process.env.REACT_APP_BASE_URL}/sheet/groups?${queryParams}`;
-          const groupsResponse = await fetch(groupsUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+          const groupsResponse = await fetch(groupsUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' },credentials:'include' });
 
           if (!groupsResponse.ok) {
             throw new Error((await groupsResponse.json()).message || "Something went wrong");
@@ -121,7 +121,8 @@ export const Sheet = () => {
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/group`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user, groupName }),
+        credentials: 'include',
+        body: JSON.stringify({ groupName }),
       });
 
       if (!response.ok) {
@@ -153,7 +154,7 @@ export const Sheet = () => {
       setError(null);
       setSuccess(false);
       const url = `${process.env.REACT_APP_BASE_URL}/sheet/group/problems?${queryParams}`;
-      const response = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+      const response = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' },credentials: 'include' });
       if (!response.ok) {
         throw new Error((await response.json()).message || "Something went wrong");
       }
@@ -182,6 +183,7 @@ export const Sheet = () => {
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/group/problem`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body,
       });
       if (!response.ok) {
@@ -216,7 +218,7 @@ export const Sheet = () => {
       setError(null);
       setSuccess(false);
       const url = `${process.env.REACT_APP_BASE_URL}/sheet/check?${queryParams}`;
-      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' },credentials: 'include' });
       if (!response.ok) {
         throw new Error((await response.json()).message || "Something went wrong");
       }
@@ -235,14 +237,13 @@ export const Sheet = () => {
   };
 
   const handleDeleteSheetConfirmed = async () => {
-    const queryParams = new URLSearchParams({ user }).toString();
     try {
       setLoading(true);
       setFetchingOperation('deleteSheet');
       setError(null);
       setSuccess(false);
-      const url = `${process.env.REACT_APP_BASE_URL}/sheet/check?${queryParams}`;
-      const response = await fetch(url, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+      const url = `${process.env.REACT_APP_BASE_URL}/sheet/check`;
+      const response = await fetch(url, { method: 'DELETE', headers: { 'Content-Type': 'application/json' },credentials:'include' });
       if (!response.ok) {
         throw new Error((await response.json()).message || "Something went wrong");
       }
@@ -282,6 +283,7 @@ export const Sheet = () => {
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/group`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials:'include',
         body: JSON.stringify({ user, groupName: groupNameInput }),
       });
 
@@ -338,7 +340,7 @@ export const Sheet = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className='bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 min-h-screen text-white p-6'>
+    <div className='bg-gradient-to-br mt-[60px] from-slate-950 via-indigo-950 to-slate-950 min-h-screen text-white p-6'>
       {/* Header Section - Logo and Sheet Management */}
       <div className="flex flex-col items-center justify-center mb-8">
         <div className="flex justify-between items-center w-full max-w-6xl">
@@ -575,7 +577,9 @@ export const Sheet = () => {
                               </div>
 
                               <div className="flex justify-between mt-4">
-                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-xs shadow-md transition-all">
+                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-xs shadow-md transition-all"
+                                 onClick={() => navigate(`/problem-practice/${problem.title}`)}>
+                                >
                                   View Details
                                 </button>
                                 <button

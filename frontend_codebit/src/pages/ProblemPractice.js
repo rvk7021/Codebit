@@ -8,7 +8,7 @@ export default function ProblemPractice() {
   const [code, setCode] = useState("");
   const [testCases, setTestCases] = useState([]);
   const [results, setResults] = useState([]);
-  const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingSubmission, setLoadingSubmission] = useState(false);
   const [problem, setProblem] = useState(null);
@@ -35,7 +35,6 @@ export default function ProblemPractice() {
     if (!user) {
       navigate("/sign-in");
     }
-    
   }, [user, navigate]);
 
   useEffect(() => {
@@ -52,21 +51,38 @@ export default function ProblemPractice() {
         console.log(data);
         
         setProblem(data.problem[0]);
-        setTestCases(data.testcases[0].TestCases || []);
+        
+        // Check if test cases exist
+        const fetchedTestCases = data.testcases[0]?.TestCases || [];
+        
+        if (fetchedTestCases.length === 0) {
+          // If no test cases are available, set a message
+          setMessage("No test cases available for this problem.");
+        }
+        
+        setTestCases(fetchedTestCases);
       } catch (err) {
         console.error("Error fetching problem data:", err);
+        setMessage("Failed to fetch problem details.");
       }
     }
+    
     if (title) {
       fetchProblemData();
     }
   }, [title]);
 
   const handleRunCode = async() => {
+    // Prevent running code if no test cases are available
+    if (testCases.length === 0) {
+      setMessage("No test cases available to run code against.");
+      return;
+    }
+
     setLoading(true);
-    setError(null);
+    setMessage(null);
     setResults([]);
-    setTestResult(true); // Automatically show test results when running code
+    setTestResult(true);
 
     try {
       const test = testCases.slice(0,2); 
@@ -82,21 +98,27 @@ export default function ProblemPractice() {
       const data = await res.json();
       
       if (!data.success) {
-        setError(data.message || "Execution failed");
+        setMessage(data.message || "Execution failed");
       } else {
         setResults(data.results);
       }
     } catch (err) {
-      setError(err.message);
+      setMessage(err.message);
     }
     setLoading(false);
   }
 
   const handleSubmit = async () => {
+    // Prevent submission if no test cases are available
+    if (testCases.length === 0) {
+      setMessage("No test cases available to submit code against.");
+      return;
+    }
+
     setLoadingSubmission(true);
-    setError(null);
+    setMessage(null);
     setResults([]);
-    setTestResult(true); // Automatically show test results when submitting code
+    setTestResult(true);
 
     try {
       const res = await fetch(`${process.env.REACT_APP_BASE_URL}/submit`, {
@@ -105,13 +127,13 @@ export default function ProblemPractice() {
           "Content-Type": "application/json",
         },
         credentials: 'include',
-        body: JSON.stringify({ code, title, testCases,problem }),
+        body: JSON.stringify({ code, title, testCases, problem }),
       });
       
       const data = await res.json();
       
       if (!data.success) {
-        setError(data.message || "Execution failed");
+        setMessage(data.message || "Execution failed");
       } else {
         setResults(data.results);
         
@@ -133,7 +155,7 @@ export default function ProblemPractice() {
         window.alert(data.message);
       }
     } catch (err) {
-      setError(err.message);
+      setMessage(err.message);
     }
     setLoadingSubmission(false);
   };
@@ -165,6 +187,18 @@ export default function ProblemPractice() {
 
   // Get the appropriate "no results" message based on state
   const getNoResultsMessage = () => {
+    if (message === "No test cases available for this problem.") {
+      return (
+        <div className="flex flex-col items-center justify-center h-64 bg-slate-950/50 rounded-lg border border-indigo-800/30 p-6">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-indigo-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+          </svg>
+          <p className="text-indigo-400 font-medium mb-2">No Test Cases</p>
+          <p className="text-gray-400 text-center">This problem currently has no test cases available for validation.</p>
+        </div>
+      );
+    }
+    
     if (loading) {
       return (
         <div className="flex flex-col items-center justify-center h-64 bg-slate-950/50 rounded-lg border border-indigo-800/30 p-6">
@@ -235,7 +269,7 @@ export default function ProblemPractice() {
     
           <div className="p-6 flex-1 h-[500px] overflow-auto">
             {problem ? (
-              showSubmission ? <Submission title={problem.title} setCode={setCode}  problem={problem} /> : <Problem problem={problem} />
+              showSubmission ? <Submission title={problem.title} setCode={setCode} problem={problem} /> : <Problem problem={problem} />
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
                 <Loader />
@@ -247,7 +281,7 @@ export default function ProblemPractice() {
     
         {/* Right Side: Code Editor & Test Cases */}
         <div className="lg:w-3/5 w-full flex flex-col">
-          {/* Action Buttons - New Location */}
+          {/* Action Buttons */}
           <div className="mb-4 flex justify-between items-center bg-slate-900 rounded-xl border border-indigo-800/30 p-4">
             <div className="flex items-center">
               <h2 className="text-lg font-bold text-indigo-300 mr-4">Code Editor</h2>
@@ -257,7 +291,7 @@ export default function ProblemPractice() {
             <div className="flex gap-3">
               <button
                 onClick={handleRunCode}
-                disabled={loading}
+                disabled={loading || testCases.length === 0}
                 className="group relative px-5 py-2.5 bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white rounded-md font-medium transition-all duration-200 flex items-center gap-2 disabled:opacity-70 shadow-md disabled:cursor-not-allowed"
               >
                 <span className="absolute inset-0 w-full h-full rounded-md bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></span>
@@ -269,16 +303,16 @@ export default function ProblemPractice() {
                 ) : (
                   <>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 80 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                     </svg>
-                    <span>Run</span>
+                    Run
                   </>
                 )}
               </button>
               
               <button
                 onClick={handleSubmit}
-                disabled={loadingSubmission}
+                disabled={loadingSubmission || testCases.length === 0}
                 className="group relative px-5 py-2.5 bg-gradient-to-b from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white rounded-md font-medium transition-all duration-200 flex items-center gap-2 disabled:opacity-70 shadow-md disabled:cursor-not-allowed"
               >
                 <span className="absolute inset-0 w-full h-full rounded-md bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></span>
@@ -290,123 +324,63 @@ export default function ProblemPractice() {
                 ) : (
                   <>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                     </svg>
-                    <span>Submit</span>
+                    Submit
                   </>
                 )}
               </button>
             </div>
           </div>
-
+          
           {/* Code Editor */}
-          <div className="flex-1 rounded-xl p-4 border border-indigo-800/30 bg-slate-900 mb-6">
-            <div className="relative rounded-lg overflow-hidden border border-indigo-800/50">
-              <textarea
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Write your solution here..."
-                className="w-full h-96 p-4 font-mono resize-none bg-slate-950 text-indigo-100 focus:outline-none"
-                style={{ 
-                  lineHeight: "1.6", 
-                  caretColor: "#818cf8",
-                }}
-              ></textarea>
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600"></div>
-            </div>
+          <div className="flex-1 mb-4">
+            <textarea
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Write your code here..."
+              className="w-full h-full bg-slate-900 border border-indigo-800/30 rounded-xl p-4 text-gray-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 resize-none"
+            />
           </div>
-
-          {/* Test Cases & Results */}
-          <div className="rounded-xl p-4 border border-indigo-800/30 bg-slate-900 h-[350px] overflow-auto mb-4">
-            <button
-              onClick={() => setTestResult(!testResult)}
-              className="mb-4 px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white rounded-lg font-bold shadow-md shadow-indigo-700/30 transition"
-            >
-              {testResult ? "Show Test Cases" : "Show Test Results"}
-            </button>
-
-            {error && (
-              <div className="mb-4 p-3 border border-red-500 rounded-lg bg-red-900/30 text-red-300">
-                {error}
-              </div>
-            )}
-
-            {testResult ? (
-              results.length > 0 ? (
-                <div>
-                  <div className="mb-4">
-                    {/* Overall verdict */}
-                    {results.every(test => test.actualOutput === test.expectedOutput) ? (
-                      <div className="p-3 rounded-lg bg-green-900/30 border border-green-500 text-green-300 text-center font-bold">
-                        All Test Cases Passed! ✓
-                      </div>
-                    ) : (
-                      <div className="p-3 rounded-lg bg-red-900/30 border border-red-500 text-red-300 text-center font-bold">
-                        Some Test Cases Failed ✗
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Individual test cases */}
-                  {results.map((test, index) => {
-                    const passed = test.actualOutput === test.expectedOutput;
-                    
-                    return (
-                      <div key={index} className={`mb-4 p-4 border ${passed ? 'border-green-800/50' : 'border-red-800/50'} rounded-lg bg-slate-900 shadow-md`}>
-                        <h3 className={`font-semibold ${passed ? 'text-green-300' : 'text-red-300'} mb-2 flex items-center`}>
-                          <span>Test Case {index + 1}</span>
-                          <span className={`ml-2 inline-flex items-center justify-center w-6 h-6 rounded-full ${passed ? 'bg-green-900/60' : 'bg-red-900/60'}`}>
-                            {passed ? '✓' : '✗'}
-                          </span>
-                        </h3>
-                        <div className="space-y-2">
-                          <div className="bg-slate-950 p-3 rounded-md">
-                            <span className="text-indigo-400 font-semibold">Input:</span>
-                            <pre className="text-gray-300 mt-1 overflow-x-auto">{test.input}</pre>
-                          </div>
-                          <div className={`bg-slate-950 p-3 rounded-md ${passed ? '' : 'border-l-4 border-red-500'}`}>
-                            <span className="text-indigo-400 font-semibold">Your Output:</span>
-                            <pre className="text-gray-300 mt-1 overflow-x-auto">{test.actualOutput}</pre>
-                          </div>
-                          <div className="bg-slate-950 p-3 rounded-md">
-                            <span className="text-indigo-400 font-semibold">Expected:</span>
-                            <pre className="text-gray-300 mt-1 overflow-x-auto">{test.expectedOutput}</pre>
-                          </div>
-                          <div className={`text-center py-1 rounded-md font-medium ${passed ? 'bg-green-900/40 text-green-300' : 'bg-red-900/40 text-red-300'}`}>
-                            {passed ? 'PASSED ✓' : 'FAILED ✗'}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                // Improved no results state with context-aware messages
-                getNoResultsMessage()
-              )
+          
+          {/* Test Case Results */}
+          <div className="bg-slate-900 rounded-xl border border-indigo-800/30 p-4">
+            <h3 className="text-lg font-bold text-indigo-300 mb-4">Test Results</h3>
+            
+            {results.length === 0 ? (
+              getNoResultsMessage()
             ) : (
-              testCases.length > 0 ? (
-                testCases.map((test, index) => (
-                  <div key={index} className="mb-4 p-4 border border-indigo-800/50 rounded-lg bg-slate-900 shadow-md">
-                    <h3 className="font-semibold text-indigo-300 mb-2">Test Case {index + 1}</h3>
-                    <div className="space-y-2">
-                      <div className="bg-slate-950 p-3 rounded-md">
-                        <span className="text-indigo-400 font-semibold">Input:</span>
-                        <pre className="text-gray-300 mt-1 overflow-x-auto">{test.Input}</pre>
+              <div className="space-y-3">
+                {results.map((result, index) => (
+                  <div 
+                    key={index} 
+                    className={`p-3 rounded-lg transition-colors ${
+                      result.actualOutput === result.expectedOutput 
+                        ? 'bg-emerald-900/30 border border-emerald-700/50' 
+                        : 'bg-rose-900/30 border border-rose-700/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium text-indigo-300">Test Case {index + 1}</span>
+                      {result.actualOutput === result.expectedOutput ? (
+                        <span className="text-emerald-400 font-bold">Passed</span>
+                      ) : (
+                        <span className="text-rose-400 font-bold">Failed</span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="text-sm text-gray-400">Expected Output:</p>
+                        <pre className="text-xs text-gray-200 bg-slate-800 p-2 rounded">{result.expectedOutput}</pre>
                       </div>
-                      <div className="bg-slate-950 p-3 rounded-md">
-                        <span className="text-indigo-400 font-semibold">Expected Output:</span>
-                        <pre className="text-gray-300 mt-1 overflow-x-auto">{test.ExpectedOutputs}</pre>
+                      <div>
+                        <p className="text-sm text-gray-400">Actual Output:</p>
+                        <pre className="text-xs text-gray-200 bg-slate-800 p-2 rounded">{result.actualOutput}</pre>
                       </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center h-64">
-                  <Loader />
-                  <p className="mt-4 text-indigo-300">Fetching test cases...</p>
-                </div>
-              )
+                ))}
+              </div>
             )}
           </div>
         </div>

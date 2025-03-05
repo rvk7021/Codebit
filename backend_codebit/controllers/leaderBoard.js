@@ -1,35 +1,35 @@
 const express = require('express');
 const app = express();
-const user = require('../models/User');
+const User = require('../models/User'); // Ensure correct import
 require('dotenv').config();
 
 exports.Leaderboard = async function (req, res) {
     try {
+        // Fetch all users, selecting only required fields
+        const leaderboard = await User.find({}, 'userName firstName lastName problemSolved college')
+            .sort({ problemsSolved: -1 });
 
-        const { college } = req.body;
-        
-        const leaderboard= await user.find({college},{userName:1,firstName:1,lastName:1,problemsSolved:1}).sort({problemsSolved:-1});
+        // If no users found, return error response
         if (leaderboard.length === 0) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
-                message: "No leaderboard corresponding to the college",
+                message: "No users found for the leaderboard.",
             });
-        } 
+        }
 
+        // Return success response with leaderboard data
         return res.status(200).json({
             success: true,
-            message: "Leaderboard fetched successfully",
+            message: "Leaderboard fetched successfully.",
             leaderboard
         });
 
     } catch (error) {
-
+        // Handle any errors
         return res.status(500).json({
             success: false,
-            message: "Error in fetching leaderboard",
+            message: "Error fetching leaderboard.",
             error: error.message
         });
-
     }
-}
-
+};

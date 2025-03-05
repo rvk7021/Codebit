@@ -72,12 +72,12 @@ export default function ProblemSet() {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           },
+          credentials: 'include',
           body: body
         });
 
         const data = await response.json();
         if (!response.ok) {
-          console.error(data.message);
           await Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -91,7 +91,6 @@ export default function ProblemSet() {
             }
           });
         } else if (data.success) {
-          console.log(data.message);
           await Swal.fire({
             icon: 'success',
             title: 'Success',
@@ -107,7 +106,6 @@ export default function ProblemSet() {
         }
       }
     } catch (error) {
-      console.error('Error saving groups:', error);
       await Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -143,7 +141,6 @@ export default function ProblemSet() {
         setProblems(problemsData);
         setFilteredProblems(problemsData);
       } catch (error) {
-        console.error('Error fetching problems:', error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -157,12 +154,12 @@ export default function ProblemSet() {
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const queryParams = new URLSearchParams({ user }).toString();
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/check?${queryParams}`, {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/check`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
+          credentials: 'include'
         });
 
         if (!response.ok) {
@@ -172,11 +169,12 @@ export default function ProblemSet() {
         const data = await response.json();
         if (data.success) {
           setSheetExist(true);
-          const groupsResponse = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/groups?${queryParams}`, {
+          const groupsResponse = await fetch(`${process.env.REACT_APP_BASE_URL}/sheet/groups`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json'
-            }
+            },
+            credentials: 'include'
           });
 
           if (!groupsResponse.ok) {
@@ -186,7 +184,6 @@ export default function ProblemSet() {
           const groupsData = await groupsResponse.json();
           if (groupsData.success) {
             setGroupNames(groupsData.groups);
-            console.log(groupNames);
           }
         }
       } catch (error) {
@@ -197,18 +194,18 @@ export default function ProblemSet() {
     };
 
     fetchGroups();
-  }, [user]);
+  }, []);
 
 
   const handleCreateSheet = async () => {
-    const queryParams = new URLSearchParams({ user }).toString();
-    const url = `${process.env.REACT_APP_BASE_URL}/sheet/check?${queryParams}`;
+    const url = `${process.env.REACT_APP_BASE_URL}/sheet/check?`;
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -232,7 +229,6 @@ export default function ProblemSet() {
 
       }
     } catch (error) {
-      console.error('Error creating sheet:', error);
       await Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -333,7 +329,6 @@ export default function ProblemSet() {
   };
 
   const handleProblemClick = (problem) => {
-    console.log(problem.title);
     navigate(`/problem-practice/${problem.title}`);
   };
 

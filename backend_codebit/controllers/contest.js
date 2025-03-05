@@ -103,6 +103,29 @@ exports.fetchUpcomingContestAPI = async (req, res) => {
         });
     }
 };
+function formatStartDateToIST(input) {
+    // Determine if the input is a Date object or a timestamp in seconds
+    let date;
+    if (input instanceof Date) {
+        date = input;
+    } else if (typeof input === "number") {
+        // For Codeforces contests, the timestamp is in seconds
+        date = new Date(input * 1000);
+    } else {
+        // Fallback if the input is a valid date string already
+        date = new Date(input);
+    }
+
+    // Format date components with leading zeros if necessary
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    // Return a valid ISO 8601 datetime string using 'T' as the separator.
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
 
 
 exports.getAllContests=async(req,res)=>{
@@ -122,4 +145,3 @@ exports.getAllContests=async(req,res)=>{
         });
     }
 }
-

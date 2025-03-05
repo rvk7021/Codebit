@@ -56,7 +56,6 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     console.log("API CALLED");
-    console.log(email, password);
 
 
     if (!email || !password) {
@@ -160,17 +159,24 @@ exports.logout = (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const userId = "67c45174ed455a61c24d2178";
-    console.log
+    // Hardcoded user ID for now
+    
+    const userId = req.user.id; 
     const { bio, country, firstName, lastName } = req.body;
     const file = req.files?.file;
 
+    // Check if at least one field is provided
     if (!file && !bio && !country && !firstName && !lastName) {
       return res.status(400).json({ success: false, message: "Fill Some Details" });
     }
 
+    // Find the user by ID
     const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User  not found" });
+    }
 
+    // Handle file upload if provided
     if (file) {
       const uploadedMedia = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -184,18 +190,22 @@ exports.updateProfile = async (req, res) => {
       });
 
       const url = uploadedMedia.secure_url;
+
+      // Delete the old profile picture if it exists
       if (user.profilePic) {
-        await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split('.')[0]);
+        const publicId = user.profilePic.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
       }
       user.profilePic = url;
     }
 
+    // Update user fields if provided
     if (bio) {
       user.bio = bio;
     }
 
     if (country) {
-      user.Country = country;
+      user.country = country; // Ensure consistent casing
     }
 
     if (firstName) {
@@ -206,17 +216,19 @@ exports.updateProfile = async (req, res) => {
       user.lastName = lastName;
     }
 
+    // Save the updated user
     await user.save();
 
     return res.status(200).json({ success: true, message: "Profile updated successfully", user });
   } catch (error) {
+    console.error("Error updating profile:", error); // Log the error for debugging
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 exports.addSocialMediaAccount = async (req, res) => {
   try {
-    const userId = "67c45174ed455a61c24d2178"; // Replace with actual user ID in production
+    const userId = req.user.id; 
     const { platform, username } = req.body;
 
     // Validate platform
@@ -252,7 +264,7 @@ exports.addSocialMediaAccount = async (req, res) => {
 // Get & Add Coding Profile
 exports.getCodingProfile = async (req, res) => {
   try {
-    const userId = "67c45174ed455a61c24d2178"; // Replace with actual user ID in production
+    const userId = req.user.id; 
     const { LeetCode, Codeforces, CodeChef } = req.body;
 
     const user = await User.findById(userId);
@@ -277,7 +289,7 @@ exports.getCodingProfile = async (req, res) => {
 // Remove Coding Profile
 exports.removeCodingProfile = async (req, res) => {
   try {
-    const userId = "67c45174ed455a61c24d2178"; // Replace with actual user ID in production
+    const userId = req.user.id; 
     const { platform } = req.body;
 
     // Validate platform name
@@ -310,13 +322,13 @@ exports.removeCodingProfile = async (req, res) => {
 // add the githubprofile section
 
 exports.addGithubProfile = async (req, res) => {
-  const user_id = "67c45174ed455a61c24d2178";
+  const userId = req.user.id; 
   try {
     const { githubProfile } = req.body;
     if (!githubProfile) {
       return res.status(400).json({ success: false, message: "Please provide a github profile" });
     }
-    const user = await User.findById(user_id);
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
