@@ -15,65 +15,69 @@ export default function Profile() {
   const [codeforcesRating, setCodeforcesRating] = useState(0);
   const [leetcodeRating, setLeetcodeRating] = useState(0);
 
+
   const data = user_data?.topics?.map(topic => ({
     topic: topic.topicName,
     problemsSolved: topic.problems.length,
     totalsolved: user_data.problemSolved
   })) ?? [];
 
-  useEffect(() => {
-    const fetchrating = async () => {
-      setLoading(true);
-      const codingProfile = user_data.codingProfile;
-      if (!codingProfile) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        let response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchleetcoderating/${codingProfile.LeetCode}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const leetcodeData = await response.json();
-        if (leetcodeData.success) {
-          setLeetcodeRating(Math.ceil(leetcodeData.rating));
-        }
-
-        response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchcodechefrating/${codingProfile.CodeChef}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const codechefData = await response.json();
-        if (codechefData.success) {
-          setCodechefRating(codechefData.rating);
-        }
-
-        response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchcodeforcesrating/${codingProfile.Codeforces}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const codeforcesData = await response.json();
-        if (codeforcesData.success) {
-          setCodeforcesRating(codeforcesData.rating);
-        }
-      } catch (error) {
-        console.error("Error fetching ratings:", error);
-      }
+  const fetchrating = async () => {
+    setLoading(true);
+    const codingProfile = user_data.codingProfile;
+    if (!codingProfile) {
       setLoading(false);
-    };
+      return;
+    }
 
+    try {
+      let updatedRatings = {
+        leetcode: 0,
+        codechef: 0,
+        codeforces: 0,
+      };
+
+      if (codingProfile.LeetCode) {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchleetcoderating/${codingProfile.LeetCode}`, {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (data.success) updatedRatings.leetcode = Math.ceil(data.rating);
+      }
+
+      if (codingProfile.CodeChef) {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchcodechefrating/${codingProfile.CodeChef}`, {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (data.success) updatedRatings.codechef = data.rating;
+      }
+
+      if (codingProfile.Codeforces) {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchcodeforcesrating/${codingProfile.Codeforces}`, {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (data.success) updatedRatings.codeforces = data.rating;
+      }
+
+      setLeetcodeRating(updatedRatings.leetcode);
+      setCodechefRating(updatedRatings.codechef);
+      setCodeforcesRating(updatedRatings.codeforces);
+    } catch (error) {
+      console.error("Error fetching ratings:", error);
+    }
+
+    setLoading(false);
+  };
+  useEffect(() => {
     fetchrating();
-  }, [user_data]);
+
+  }, []);
+
 
   let ratings = [
     { platform: "CodeChef", rating: codechefRating },
@@ -107,7 +111,7 @@ export default function Profile() {
         { profileName: user_data.codingProfile?.CodeChef || "", platform: "CodeChef" },
         { profileName: user_data.codingProfile?.Codeforces || "", platform: "Codeforces" },
       ],
-      location: "India",
+      location: user_data.Country,
       ratings: ratings,
       socialLinks: {
         linkedin: user_data.SocialMedia?.linkedin || "",
@@ -125,7 +129,7 @@ export default function Profile() {
     userName: temp[0].userName,
     email: temp[0].email,
     bio: temp[0].About || "",
-    country: temp[0].location || "",
+    country: temp[0].Country || "",
     profilePic: temp[0].profilePic || ""
   });
 
@@ -166,7 +170,7 @@ export default function Profile() {
   const [profileUpdated, setProfileUpdated] = useState(false);
 
   const handleSaveProfile = async () => {
-    if (!profileForm.firstName || !profileForm.lastName || !profileForm.userName) {
+    if (!profileForm.firstName || !profileForm.lastName) {
       Swal.fire({
         icon: "error",
         title: "Invalid Input",
@@ -213,7 +217,7 @@ export default function Profile() {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to update profile");
       }
-
+      window.location.reload();
       Swal.fire({
         icon: "success",
         title: "Profile Updated",
@@ -255,6 +259,8 @@ export default function Profile() {
   };
 
   const handleEditGithub = (e) => {
+    setShowPlatformDropdown(false);
+    setShowSocialDropdown(false);
     e.stopPropagation();
     setGithubForm(temp[0].GitHub || "");
     setShowGithubForm(true);
@@ -316,13 +322,14 @@ export default function Profile() {
 
   const handleOpenSocialDropdown = () => {
     setShowPlatformDropdown(false);
+    setShowGithubForm(false);
     setSocialLinksForm({
       linkedin: temp[0].socialLinks.linkedin || "",
       twitter: temp[0].socialLinks.twitter || "",
       instagram: temp[0].socialLinks.instagram || "",
       email: temp[0].socialLinks.email || ""
     });
-    setShowSocialDropdown(true);
+    setShowSocialDropdown(!showSocialDropdown);
   };
 
   const handleSocialFormChange = (socialPlatform, value) => {
@@ -367,7 +374,7 @@ export default function Profile() {
       });
 
       await Promise.all(promises);
-
+      window.location.reload();
       Swal.fire({
         icon: "success",
         title: "Social Links Updated",
@@ -419,13 +426,14 @@ export default function Profile() {
         if (!response.ok) {
           throw new Error("Failed to update profile");
         }
-
+        await fetchrating();
         Swal.fire({
           icon: "success",
           title: "Coding Profile Updated",
           text: `${currentEditPlatform} updated with username ${newProfileName}`,
           confirmButtonColor: "#28a745",
         });
+        window.location.reload();
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -467,6 +475,9 @@ export default function Profile() {
       if (!response.ok) {
         throw new Error("Failed to remove platform");
       }
+      window.location.reload();
+      const temp2 = temp;
+      temp2[0].codingProfile = temp2[0].codingProfile.filter((p) => p.platform !== platformName);
 
       Swal.fire({
         icon: "success",
@@ -680,7 +691,7 @@ export default function Profile() {
                   className="h-[150px] w-[150px] mt-2 rounded-full bg-black border-4 border-indigo-200/20"
                 />
                 <h1 className="text-2xl font-bold text-white mt-4">
-                  {temp[0].firstName + " " + temp[0].lastName}
+                  {user_data.firstName + " " + temp[0].lastName}
                 </h1>
                 <h4 className="text-indigo-200 font-medium">
                   @{temp[0].userName}
@@ -817,7 +828,7 @@ export default function Profile() {
                   </span>
                 </div>
                 <div className="coding-profile-section grid grid-cols-2 pc:grid-cols-3 lg:grid-cols-2 xs:grid-cols-3 mt-2 md:p-3 p-1 w-full relative">
-                  <h1 className="text-[24px] col-span-2 pc:col-span-3 xs:col-span-3 lg:col-span-2 mb-2 text-center font-bold text-white bg-indigo-600/20 rounded-lg py-2 font-mono">
+                  <h1 className="text-[24px] mt-4 sm:mt-0 col-span-2 pc:col-span-3 xs:col-span-3 lg:col-span-2 mb-2 text-center font-bold text-white bg-indigo-600/20 rounded-lg py-2 font-mono">
                     Techies' Arena
                   </h1>
                   {showPlatformDropdown && (
@@ -1073,9 +1084,9 @@ export default function Profile() {
                       <p className="text-lg font-semibold text-gray-300 mt-2">{rating.platform}</p>
                       <div className="flex items-baseline">
                         <span className="text-2xl font-bold text-white">
-                          {isNaN(rating.rating) ? "N/A" : rating.rating}
+                          {rating.rating ? rating.rating : "N/A"}
                         </span>
-                        <span className="text-sm text-gray-400 ml-1">rating</span>
+                        <span className="text-sm text-gray-400 ml-1">{rating.rating ? "rating" : ""}</span>
                       </div>
                     </div>
                   )
@@ -1088,5 +1099,3 @@ export default function Profile() {
     </>
   );
 }
-
-

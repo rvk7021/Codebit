@@ -107,15 +107,15 @@ export default function CodeRunner() {
                   onChange={(e) => setCode(e.target.value)}
                   placeholder="Write your code here..."
                   className="w-full flex-1 p-4 font-mono resize-none bg-slate-900 text-indigo-100 focus:outline-none"
-                  style={{ 
-                    lineHeight: "1.6", 
+                  style={{
+                    lineHeight: "1.6",
                     caretColor: "#818cf8",
                   }}
                 ></textarea>
                 <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600"></div>
               </div>
             </div>
-            
+
             {/* Info section - collapsible on small screens */}
             <div className="rounded-xl border border-indigo-800/30 bg-slate-900 p-3 hidden md:block">
               <div className="flex items-center">

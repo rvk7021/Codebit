@@ -9,40 +9,40 @@ export default function Contest() {
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 0
   );
-  
+
   const mainControls = useAnimation();
   const leftControls = useAnimation();
   const rightControls = useAnimation();
-  
+
   const { ref: mainRef, inView: mainInView } = useInView({ threshold: 0.2 });
   const { ref: leftRef, inView: leftInView } = useInView({ threshold: 0.2 });
   const { ref: rightRef, inView: rightInView } = useInView({ threshold: 0.2 });
-  
+
   // Track window width for responsive behavior
   useEffect(() => {
     function handleResize() {
       setWindowWidth(window.innerWidth);
     }
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   // Check if we're at sm breakpoint (Tailwind default is <640px)
   const isSmBreakpoint = windowWidth < 640;
-  
+
   useEffect(() => {
     if (mainInView) {
       mainControls.start('visible');
     }
   }, [mainControls, mainInView]);
-  
+
   useEffect(() => {
     if (leftInView) {
       leftControls.start('visible');
     }
   }, [leftControls, leftInView]);
-  
+
   useEffect(() => {
     if (rightInView) {
       rightControls.start('visible');
@@ -90,7 +90,7 @@ export default function Contest() {
         >
           Loading upcoming contests
         </motion.div>
-        <motion.div 
+        <motion.div
           className="flex space-x-2"
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
@@ -113,9 +113,9 @@ export default function Contest() {
       </div>
     </div>
   );
-  
+
   if (error) return (
-    <motion.div 
+    <motion.div
       className="bg-slate-900 border h-screen border-red-500 rounded-md p-4 my-4 max-w-2xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -142,7 +142,7 @@ export default function Contest() {
 
   return (
     <div className="mx-auto mt-[50px] min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 px-4 py-8">
-      <motion.h1 
+      <motion.h1
         ref={mainRef}
         initial="hidden"
         animate={mainControls}
@@ -157,21 +157,21 @@ export default function Contest() {
           Upcoming Contests
         </span>
       </motion.h1>
-      
+
       <div className="grid md:grid-cols-2 gap-6">
         {platforms.map((platform, index) => {
           const platformContests = contests.filter(contest =>
             contest.platform && contest.platform.toLowerCase() === platform.toLowerCase()
           );
-          
+
           // First platform slides from left, second from right
           const slideDirection = index === 0 ? -100 : 100;
           const controlsToUse = index === 0 ? leftControls : rightControls;
           const refToUse = index === 0 ? leftRef : rightRef;
 
           return (
-            <motion.div 
-              key={platform} 
+            <motion.div
+              key={platform}
               ref={refToUse}
               initial="hidden"
               animate={controlsToUse}
@@ -179,8 +179,8 @@ export default function Contest() {
                 hidden: { opacity: 0, x: slideDirection },
                 visible: { opacity: 1, x: 0 },
               }}
-              transition={{ 
-                duration: 0.8, 
+              transition={{
+                duration: 0.8,
                 ease: [0.2, 0.65, 0.3, 0.9], // Custom ease curve for smoother animation
                 delay: 0.2
               }}
@@ -189,7 +189,7 @@ export default function Contest() {
               <div className="text-center py-3 px-4">
                 <h2 className="text-2xl md:text-3xl border-b-2 border-indigo-400 pb-3 font-bold text-white">{platform}</h2>
               </div>
-              
+
               <div className="p-4">
                 {platformContests.length === 0 ? (
                   <p className="text-gray-300 text-center py-4">No upcoming contests for {platform}.</p>
@@ -200,23 +200,23 @@ export default function Contest() {
                         key={contest._id}
                         initial={{ opacity: 0, x: slideDirection / 2 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ 
+                        transition={{
                           duration: 0.5,
                           delay: 0.1 * idx,
                           ease: [0.2, 0.65, 0.3, 0.9] // Custom ease curve for smoother animation
                         }}
                         className={`rounded-lg p-4 duration-100 shadow-lg
-                          ${isSmBreakpoint ? 
-                            'sm:hover:bg-slate-700 bg-purple-900/30 sm:hover:border-purple-500 sm:hover:shadow-purple-900/40' : 
+                          ${isSmBreakpoint ?
+                            'sm:hover:bg-slate-700 bg-purple-900/30 sm:hover:border-purple-500 sm:hover:shadow-purple-900/40' :
                             'hover:bg-slate-700 bg-indigo-900/30 hover:border-indigo-500'}`}
-                        whileHover={{ 
+                        whileHover={{
                           scale: isSmBreakpoint ? 1.03 : 1.02,
                           y: isSmBreakpoint ? -5 : 0
                         }}
                       >
                         <h3 className={`text-lg font-medium mb-2 ${isSmBreakpoint ? 'sm:group-hover:text-purple-300 text-white' : 'text-white'}`}>{contest.name}</h3>
                         <p className="text-gray-300 text-sm mb-3">{contest.description}</p>
-                        
+
                         <div className="grid grid-cols-2 gap-2 mb-3">
                           <div className="p-2 rounded bg-slate-900/80">
                             <p className="text-xs text-indigo-300 font-medium">START TIME</p>
@@ -231,11 +231,11 @@ export default function Contest() {
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex justify-center">
-                          <motion.a 
-                            href={contest.link} 
-                            target="_blank" 
+                          <motion.a
+                            href={contest.link}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-white font-medium py-2 px-6 rounded-full transition-all duration-300 text-sm shadow-md bg-blue-400"
                             whileHover={{ scale: isSmBreakpoint ? 1.08 : 1.05, backgroundColor: "#4338ca" }}
