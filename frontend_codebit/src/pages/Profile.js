@@ -14,6 +14,8 @@ export default function Profile() {
   const [codechefRating, setCodechefRating] = useState(0);
   const [codeforcesRating, setCodeforcesRating] = useState(0);
   const [leetcodeRating, setLeetcodeRating] = useState(0);
+  console.log("Printing user data",user_data);
+  
 
 
   const data = user_data?.topics?.map(topic => ({

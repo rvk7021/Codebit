@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-// import Navbar from '../components/Navbar';
 export default function Contest() {
   const [contests, setContests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +55,8 @@ export default function Contest() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
+          credentials: 'include'
         });
 
         if (!response.ok) {

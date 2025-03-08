@@ -2,5 +2,7 @@
 using namespace std;
 int main()
 {
-cout<<a;
+int a,b;
+cin>>a>>b;
+cout<<a+b<<endl;
 }

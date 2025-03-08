@@ -29,9 +29,9 @@ function App() {
 
         const data = await response.json();
         if (data.success) {
-          console.log("User fetched successfully");
-          console.log(data.user);
-
+         
+          console.log("Valid User");
+          
           dispatch(setUser(data.user));
         }
       } catch (error) {

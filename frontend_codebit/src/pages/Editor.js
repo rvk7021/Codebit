@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
-
 export default function CodeRunner() {
   const [code, setCode] = useState('');
   const [input, setInput] = useState('');
@@ -8,15 +6,13 @@ export default function CodeRunner() {
   const [output, setOutput] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  // const navigate = useNavigate();
+  
 
-  // Language options with icons
   const languages = [
     { value: 'cpp', label: 'C++' },
 
   ];
 
-  // Load code from sessionStorage when the component mounts
   useEffect(() => {
     const savedCode = sessionStorage.getItem('code');
     const savedLanguage = sessionStorage.getItem('language');
@@ -24,13 +20,11 @@ export default function CodeRunner() {
     if (savedLanguage) setLanguage(savedLanguage);
   }, []);
 
-  // Save code to sessionStorage whenever it changes
   useEffect(() => {
     sessionStorage.setItem('code', code);
     sessionStorage.setItem('language', language);
   }, [code, language]);
 
-  // Handles code execution by sending data to the backend API
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
