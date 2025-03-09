@@ -7,10 +7,8 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 const userRoutes = require('./routes/user');
 const {scheduleEmailTask}=require('./controllers/sendContestMail');
-const path=require('path');
 dotenv.config();
  database.connect();
- const __dirname = path.resolve();
 app.use(cors({
     origin: "http://localhost:3000",
     credentials: true  
