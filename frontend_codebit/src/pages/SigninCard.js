@@ -30,7 +30,7 @@ export default function SigninCard() {
 
     try {
       dispatch(setLoading(true));
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/login`, {
+      const response = await fetch("http://13.53.41.165:4000/login", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
