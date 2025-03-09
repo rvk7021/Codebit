@@ -8,4 +8,3 @@ npm install
 # Install dependencies for frontend
 cd frontend_codebit
 npm install
-npm run build
