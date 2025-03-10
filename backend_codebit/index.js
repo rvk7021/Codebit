@@ -10,7 +10,7 @@ const {scheduleEmailTask}=require('./controllers/sendContestMail');
 dotenv.config();
  database.connect();
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: "https://codebit-lfcr.onrender.com",
     credentials: true  
 }));
 
