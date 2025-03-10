@@ -7,14 +7,11 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { FaEdit, FaPlus, FaMinus, FaTrash } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { RatingComponent } from "../components/ratingComponent";
 
 export default function Profile() {
   const { user: user_data = {} } = useSelector((state) => state.profile);
   const [loading, setLoading] = useState(false);
-  const [codechefRating, setCodechefRating] = useState(0);
-  const [codeforcesRating, setCodeforcesRating] = useState(0);
-  const [leetcodeRating, setLeetcodeRating] = useState(0);
-
 
   const data = user_data?.topics?.map(topic => ({
     topic: topic.topicName,
@@ -22,68 +19,8 @@ export default function Profile() {
     totalsolved: user_data.problemSolved
   })) ?? [];
 
-  const fetchrating = async () => {
-    setLoading(true);
-    const codingProfile = user_data.codingProfile;
-    if (!codingProfile) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      let updatedRatings = {
-        leetcode: 0,
-        codechef: 0,
-        codeforces: 0,
-      };
-
-      if (codingProfile.LeetCode) {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchleetcoderating/${codingProfile.LeetCode}`, {
-          method: "GET",
-          credentials: "include",
-        });
-        const data = await response.json();
-        if (data.success) updatedRatings.leetcode = Math.ceil(data.rating);
-      }
-
-      if (codingProfile.CodeChef) {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchcodechefrating/${codingProfile.CodeChef}`, {
-          method: "GET",
-          credentials: "include",
-        });
-        const data = await response.json();
-        if (data.success) updatedRatings.codechef = data.rating;
-      }
-
-      if (codingProfile.Codeforces) {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchcodeforcesrating/${codingProfile.Codeforces}`, {
-          method: "GET",
-          credentials: "include",
-        });
-        const data = await response.json();
-        if (data.success) updatedRatings.codeforces = data.rating;
-      }
-
-      setLeetcodeRating(updatedRatings.leetcode);
-      setCodechefRating(updatedRatings.codechef);
-      setCodeforcesRating(updatedRatings.codeforces);
-    } catch (error) {
-      console.error("Error fetching ratings:", error);
-    }
-
-    setLoading(false);
-  };
-  useEffect(() => {
-    fetchrating();
-
-  }, []);
 
 
-  let ratings = [
-    { platform: "CodeChef", rating: codechefRating },
-    { platform: "Codeforces", rating: codeforcesRating },
-    { platform: "LeetCode", rating: leetcodeRating },
-  ];
 
   const topicNames = user_data.topics?.map((topic) => topic.topicName) || [];
 
@@ -112,7 +49,6 @@ export default function Profile() {
         { profileName: user_data.codingProfile?.Codeforces || "", platform: "Codeforces" },
       ],
       location: user_data.Country,
-      ratings: ratings,
       socialLinks: {
         linkedin: user_data.SocialMedia?.linkedin || "",
         twitter: user_data.SocialMedia?.twitter || "",
@@ -426,7 +362,6 @@ export default function Profile() {
         if (!response.ok) {
           throw new Error("Failed to update profile");
         }
-        await fetchrating();
         Swal.fire({
           icon: "success",
           title: "Coding Profile Updated",
@@ -463,6 +398,7 @@ export default function Profile() {
     const url = process.env.REACT_APP_BASE_URL + "/removecodingprofile";
 
     try {
+      setLoading(true);
       const response = await fetch(url, {
         method: "DELETE",
         headers: {
@@ -478,13 +414,14 @@ export default function Profile() {
       window.location.reload();
       const temp2 = temp;
       temp2[0].codingProfile = temp2[0].codingProfile.filter((p) => p.platform !== platformName);
-
+      setLoading(false);
       Swal.fire({
         icon: "success",
         title: "Platform Removed",
         text: `${platformName} has been removed successfully.`,
         confirmButtonColor: "#28a745",
       });
+
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -493,7 +430,7 @@ export default function Profile() {
         confirmButtonColor: "#d33",
       });
     }
-
+    setLoading(false);
     setShowPlatformEditForm(false);
   };
 
@@ -1071,27 +1008,7 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 grid xs:grid-cols-3 gap-4">
-                {temp[0]?.ratings.map((rating, index) =>
-                  rating.platform && (
-                    <div
-                      key={index}
-                      className="p-4 bg-gradient-to-r from-indigo-900 to-slate-900 rounded-lg text-center shadow-lg flex flex-col items-center hover:shadow-indigo-500/20 hover:scale-105 duration-300"
-                    >
-                      <div className={`text-2xl ${getPlatformColor(rating.platform)}`}>
-                        {getPlatformIcon(rating.platform)}
-                      </div>
-                      <p className="text-lg font-semibold text-gray-300 mt-2">{rating.platform}</p>
-                      <div className="flex items-baseline">
-                        <span className="text-2xl font-bold text-white">
-                          {rating.rating ? rating.rating : "N/A"}
-                        </span>
-                        <span className="text-sm text-gray-400 ml-1">{rating.rating ? "rating" : ""}</span>
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
+              <RatingComponent key={JSON.stringify(user_data?.codingProfile)} codingProfile={user_data?.codingProfile} />
 
             </div>
           </div>
