@@ -48,7 +48,7 @@ export default function ProblemPractice() {
         });
         
         const data = await res.json();
-        console.log(data);
+    
         
         setProblem(data.problem[0]);
         
@@ -62,7 +62,7 @@ export default function ProblemPractice() {
         
         setTestCases(fetchedTestCases);
       } catch (err) {
-        console.error("Error fetching problem data:", err);
+  
         setMessage("Failed to fetch problem details.");
       }
     }
@@ -149,10 +149,10 @@ export default function ProblemPractice() {
           setTimeout(() => {
             setShowAcceptedAnimation(false);
             setShowSubmission(true);
-          }, 2500);
+          }, 2500)
         }
         
-        window.alert(data.message);
+        
       }
     } catch (err) {
       setMessage(err.message);

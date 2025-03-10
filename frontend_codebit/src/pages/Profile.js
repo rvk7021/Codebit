@@ -1009,7 +1009,6 @@ export default function Profile() {
                 </div>
               </div>
               <RatingComponent key={JSON.stringify(user_data?.codingProfile)} codingProfile={user_data?.codingProfile} />
-
             </div>
           </div>
         </div>)}

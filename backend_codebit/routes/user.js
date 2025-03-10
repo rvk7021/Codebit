@@ -8,7 +8,7 @@ const {fetchUpcomingContestAPI,getAllContests}=require('../controllers/contest')
 const {executeCode}=require('../controllers/compiler')
 const {Leaderboard}=require('../controllers/leaderBoard');
 const {auth }=require('../middleware/auth');
-const {getAllUserDetails,getUser,logout,updateProfile,addSocialMediaAccount,addGithubProfile,getCodingProfile,removeCodingProfile}=require('../controllers/auth');
+const {getUser,logout,updateProfile,addSocialMediaAccount,addGithubProfile,getCodingProfile,removeCodingProfile}=require('../controllers/auth');
 const {submitCode,getUserSubmissions,runCode}=require('../controllers/submission');
 const {addPost,getLatestPosts,likeUnlikePost,deletePost,getFeedPosts,getUserPosts,addComment,getComments}=require('../controllers/post');
 const {fetchCodeChefRating,fetchCodeforcesRating,fetchLeetCodeRating}=require('../controllers/rating');
@@ -20,9 +20,9 @@ router.post('/logout', auth, logout);
 router.get('/getUser',auth,getUser);
 router.post('/uploadProfile',auth,updateProfile);
 router.post('/addsocialmedia',auth,addSocialMediaAccount);
-router.get('/fetchcodeforcesrating/:username',fetchCodeforcesRating);
-router.get('/fetchcodechefrating/:username',fetchCodeChefRating);
-router.get('/fetchleetcoderating/:username',fetchLeetCodeRating);
+router.get('/fetchcodeforcesrating/:username',auth,fetchCodeforcesRating);
+router.get('/fetchcodechefrating/:username',auth,fetchCodeChefRating);
+router.get('/fetchleetcoderating/:username',auth,fetchLeetCodeRating);
 router.post('/getcodingprofile',auth,getCodingProfile);
 router.post('/addgithub',auth,addGithubProfile);
 router.delete('/removecodingprofile',auth,removeCodingProfile);
@@ -35,7 +35,7 @@ router.post('/problems/addTest',addTestCase);
 router.get('/problems',AllProblems);
 // contest routes
 router.post('/contest',fetchUpcomingContestAPI);
-router.get('/contests',getAllContests);
+router.get('/contests',auth,getAllContests);
 router.post('/execute',executeCode);
 router.post('/submit',auth,submitCode);
 router.post('/run',runCode);
@@ -53,7 +53,7 @@ router.post('/sheet/group/problem',auth,AddProblemToGroup);
 router.get('/sheet/group/problems',auth,ShowProblemsInGroup);
 router.delete('/sheet/group/problem',auth,RemoveProblemFromGroup);
 // user routes
-router.get("/getUserDetails",auth,getAllUserDetails);
+
 //post routes
 router.post('/post',auth,addPost);
 router.post('/post/like/:postId',auth,likeUnlikePost);

@@ -89,13 +89,20 @@ exports.login = async (req, res) => {
       // Set cookie for token and return success response
       // httpOnly: This ensures that the cookie cannot be accessed via JavaScript (helps prevent cross-site scripting attacks).
 
+      // const options = {
+      //   expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+      //   httpOnly: true,
+      //   secure: false,
+      //   sameSite: "lax"
+
+      // }
       const options = {
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure: false,
-        sameSite: "lax"
-
-      }
+        secure: process.env.NODE_ENV === "production", // ✅ Secure only in production
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax" // ✅ "none" for cross-origin
+    };
+    
       res.cookie("token", token, options).status(200).json({
         success: true,
         token,
@@ -116,24 +123,6 @@ exports.login = async (req, res) => {
       message: 'User Login Failed',
       error: err.message,
     });
-  }
-}
-
-exports.getAllUserDetails = async (req, res) => {
-  try {
-    const id = req.user.id
-    const userDetails = await User.findById(id)
-
-    res.status(200).json({
-      success: true,
-      message: "User Data fetched successfully",
-      data: userDetails,
-    })
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    })
   }
 }
 
@@ -159,24 +148,22 @@ exports.logout = (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    // Hardcoded user ID for now
+    
     
     const userId = req.user.id; 
     const { bio, country, firstName, lastName } = req.body;
     const file = req.files?.file;
 
-    // Check if at least one field is provided
     if (!file && !bio && !country && !firstName && !lastName) {
       return res.status(400).json({ success: false, message: "Fill Some Details" });
     }
-
-    // Find the user by ID
+// can save one call here
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User  not found" });
     }
+    let url = user.profilePic;
 
-    // Handle file upload if provided
     if (file) {
       const uploadedMedia = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -188,44 +175,28 @@ exports.updateProfile = async (req, res) => {
         );
         stream.end(file.data);
       });
-
-      const url = uploadedMedia.secure_url;
-
-      // Delete the old profile picture if it exists
-      if (user.profilePic) {
-        const publicId = user.profilePic.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(publicId);
-      }
-      user.profilePic = url;
+       url = uploadedMedia.secure_url;
+     
     }
 
-    // Update user fields if provided
-    if (bio) {
-      user.bio = bio;
-    }
-
-    if (country) {
-      user.country = country; // Ensure consistent casing
-    }
-
-    if (firstName) {
-      user.firstName = firstName;
-    }
-
-    if (lastName) {
-      user.lastName = lastName;
-    }
-
-    // Save the updated user
-    await user.save();
-
-    return res.status(200).json({ success: true, message: "Profile updated successfully", user });
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+          profilePic: url,
+        bio,
+        country,
+        firstName,
+        lastName,
+      },
+      { new: true } 
+    );
+    
+    return res.status(200).json({ success: true, message: "Profile updated successfully", updatedUser });
   } catch (error) {
     console.error("Error updating profile:", error); // Log the error for debugging
     return res.status(500).json({ success: false, message: error.message });
   }
 };
-
 exports.addSocialMediaAccount = async (req, res) => {
   try {
     const userId = req.user.id; 
@@ -237,20 +208,28 @@ exports.addSocialMediaAccount = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid platform" });
     }
 
-    const user = await User.findById(userId);
-    if (!user) {
+    const update = {};
+    if (!username || username.trim() === "") {
+      update[`SocialMedia.${platform}`] = undefined; // Removes the field
+    } else {
+      update[`SocialMedia.${platform}`] = username.trim();
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: update },
+      { new: true } // ✅ Ensures we return the updated document
+    );
+
+    if (!updatedUser) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // Remove empty or null values before adding
-    if (!username || username.trim() === "") {
-      delete user.SocialMedia[platform]; // Remove platform if username is empty
-    } else {
-      user.SocialMedia[platform] = username.trim(); // Add new username
-    }
-
-    await user.save();
-    return res.status(200).json({ success: true, message: `${platform} updated successfully!` });
+    return res.status(200).json({
+      success: true,
+      message: `${platform} updated successfully!`,
+      updatedUser,
+    });
 
   } catch (error) {
     console.error("Error adding social media account:", error);
@@ -259,9 +238,6 @@ exports.addSocialMediaAccount = async (req, res) => {
 };
 
 
-
-
-// Get & Add Coding Profile
 exports.getCodingProfile = async (req, res) => {
   try {
     const userId = req.user.id; 
@@ -280,7 +256,7 @@ exports.getCodingProfile = async (req, res) => {
 
     await user.save();
 
-    return res.status(200).json({ success: true, message: "Coding profile updated successfully" });
+    return res.status(200).json({ success: true, message: "Coding profile updated successfully",user });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
@@ -312,7 +288,7 @@ exports.removeCodingProfile = async (req, res) => {
     user.codingProfile[platform] = null;
     await user.save();
 
-    return res.status(200).json({ success: true, message: `${platform} profile removed successfully` });
+    return res.status(200).json({ success: true, message: `${platform} profile removed successfully`,user });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
@@ -334,7 +310,7 @@ exports.addGithubProfile = async (req, res) => {
     }
     user.githubProfile = githubProfile;
     await user.save();
-    return res.status(200).json({ success: true, message: "Github profile added successfull" });
+    return res.status(200).json({ success: true, message: "Github profile added successfull",user });
 
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to add github" });

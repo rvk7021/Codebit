@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setUser, setLoading } from '../components/Redux/Slices/ProfileSlice';
 
 export default function SigninCard() {
@@ -10,7 +10,7 @@ export default function SigninCard() {
   });
 
   const [error, setError] = useState(null);
-  const [isHovered, setIsHovered] = useState(false);
+  // const [isHovered, setIsHovered] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function SigninCard() {
 
     try {
       dispatch(setLoading(true));
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/login`, {
+      const response = await fetch("http://13.53.41.165:4000/login", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -9,7 +9,6 @@ const userRoutes = require('./routes/user');
 const {scheduleEmailTask}=require('./controllers/sendContestMail');
 dotenv.config();
  database.connect();
-
 app.use(cors({
     origin: "http://localhost:3000",
     credentials: true  
@@ -29,6 +28,11 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is started on http://localhost:${PORT}`);
 });
+// app.use(express.static(path.join(__dirname, 'frontend_codebit/dist')))
+
+// app.get('*', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'frontend_codebit','dist','index.html'))
+// })
 // setTimeout(() => {
 //     scheduleEmailTask();
 // }, 10000);
