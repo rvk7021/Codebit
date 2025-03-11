@@ -33,6 +33,6 @@ app.listen(PORT, () => {
 // app.get('*', (req, res) => {
 //     res.sendFile(path.join(__dirname, 'frontend_codebit','dist','index.html'))
 // })
-// setTimeout(() => {
-//     scheduleEmailTask();
-// }, 10000);
+setTimeout(() => {
+    scheduleEmailTask();
+}, 10000);

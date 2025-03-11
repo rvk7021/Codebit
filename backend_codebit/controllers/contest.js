@@ -85,7 +85,7 @@ const scheduleFetch = () => {
     if (cronJob) {
         cronJob.stop();
     }
-    const cronJob = cron.schedule('*/4 * * * *', fetchUpcomingContest);
+     cronJob = cron.schedule('*/4 * * * *', fetchUpcomingContest);
 
   
 };
