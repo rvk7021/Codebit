@@ -7,13 +7,14 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 const userRoutes = require('./routes/user');
 const {scheduleEmailTask}=require('./controllers/sendContestMail');
+// const path = require('path');
 dotenv.config();
  database.connect();
 app.use(cors({
-    origin: "https://codebit-sr.netlify.app/",
+    origin: "https://codebit-sr.netlify.app",
     credentials: true  
 }));
-
+// const __dirname = path.resolve();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
