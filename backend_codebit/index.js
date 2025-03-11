@@ -7,14 +7,15 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 const userRoutes = require('./routes/user');
 const {scheduleEmailTask}=require('./controllers/sendContestMail');
-// const path = require('path');
+const job = require('./cron/cron');
 dotenv.config();
  database.connect();
+ job.start();
 app.use(cors({
     origin: "https://codebit-lfcr.onrender.com",
     credentials: true  
 }));
-// const __dirname = path.resolve();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -22,18 +23,14 @@ app.use(fileUpload());
 app.use('/', userRoutes);
 
 app.get('/', (req, res) => {
-    res.send("API is working!");
+    res.status(200).json({ message: "Server is working!" });
+    
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is started on http://localhost:${PORT}`);
 });
-// app.use(express.static(path.join(__dirname, 'frontend_codebit/dist')))
-
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'frontend_codebit','dist','index.html'))
-// })
 setTimeout(() => {
     scheduleEmailTask();
 }, 10000);

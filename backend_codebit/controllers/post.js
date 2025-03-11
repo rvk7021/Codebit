@@ -4,9 +4,7 @@ const { cloudinary } = require("../config/cloudinary");
 exports.addPost = async (req, res) => {
     try {
         const { content, tags } = req.body;
-       console.log(content);
-       
-        
+      
         const userId = req.user.id;
         const userName = req.user.userName;
         const files = req.files?.media;
@@ -63,7 +61,7 @@ exports.addComment = async (req, res) => {
     try {
         const { content } = req.body;
         const userId = req.user.id;
-        const userName = req.user.userName;  // Added username
+        const userName = req.user.userName;  
 
         if (!content) {
             return res.status(400).json({ message: "Comment must contain text" });
@@ -75,7 +73,7 @@ exports.addComment = async (req, res) => {
 
         const newComment = {
             user: userId,
-            userName, // Added username
+            userName, 
             content,
             likes: [],
         };
@@ -130,7 +128,7 @@ exports.likeUnlikePost = async (req, res) => {
         if (!post) return res.status(404).json({ message: "Post not found" });
 
         const userId = req.user.id;
-        const userName = req.user.userName; // Added username
+        const userName = req.user.userName;
         const likeIndex = post.likes.findIndex(like => like.user.toString() === userId);
 
         if (likeIndex === -1) {
@@ -240,16 +238,16 @@ exports.getLatestPosts = async (req, res) => {
 
         const formattedPosts = latestPosts.map((post, index) => ({
             id: post._id,
-            title: post.content.substring(0, 50) + (post.content.length > 50 ? "..." : ""), // Generate title from content
-            excerpt: post.content.substring(0, 100) + (post.content.length > 100 ? "..." : ""), // Short description
+            title: post.content.substring(0, 50) + (post.content.length > 50 ? "..." : ""), 
+            excerpt: post.content.substring(0, 100) + (post.content.length > 100 ? "..." : ""), 
             author: post.userName,
-            authorAvatar: post.userName.charAt(0).toUpperCase(), // First letter as avatar
+            authorAvatar: post.userName.charAt(0).toUpperCase(),
             date: new Date(post.createdAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "2-digit",
                 year: "numeric",
             }),
-            image: post.media.length > 0 ? post.media[0].type : "DefaultImage", // Use media type if available
+            image: post.media.length > 0 ? post.media[0].type : "DefaultImage", 
             likes: post.likes.length,
             comments: post.comments.length,
         }));

@@ -193,7 +193,7 @@ exports.updateProfile = async (req, res) => {
     
     return res.status(200).json({ success: true, message: "Profile updated successfully", updatedUser });
   } catch (error) {
-    console.error("Error updating profile:", error); // Log the error for debugging
+    console.error("Error updating profile:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -210,7 +210,7 @@ exports.addSocialMediaAccount = async (req, res) => {
 
     const update = {};
     if (!username || username.trim() === "") {
-      update[`SocialMedia.${platform}`] = undefined; // Removes the field
+      update[`SocialMedia.${platform}`] = undefined; 
     } else {
       update[`SocialMedia.${platform}`] = username.trim();
     }
@@ -218,7 +218,7 @@ exports.addSocialMediaAccount = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: update },
-      { new: true } // ✅ Ensures we return the updated document
+      { new: true }
     );
 
     if (!updatedUser) {
@@ -262,13 +262,12 @@ exports.getCodingProfile = async (req, res) => {
   }
 };
 
-// Remove Coding Profile
 exports.removeCodingProfile = async (req, res) => {
   try {
     const userId = req.user.id; 
     const { platform } = req.body;
 
-    // Validate platform name
+   
     const validPlatforms = ["LeetCode", "Codeforces", "CodeChef"];
     if (!validPlatforms.includes(platform)) {
       return res.status(400).json({ success: false, message: "Invalid platform name" });
@@ -279,12 +278,12 @@ exports.removeCodingProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // Check if the platform is already empty
+    
     if (!user.codingProfile[platform]) {
       return res.status(400).json({ success: false, message: `${platform} first add a profile` });
     }
 
-    // Remove profile by setting it to null
+
     user.codingProfile[platform] = null;
     await user.save();
 
@@ -295,7 +294,7 @@ exports.removeCodingProfile = async (req, res) => {
 };
 
 
-// add the githubprofile section
+
 
 exports.addGithubProfile = async (req, res) => {
   const userId = req.user.id; 

@@ -3,7 +3,6 @@ const app = express();
 require('dotenv').config();
 const Sheet = require('../models/Sheet');
 const Problem = require('../models/Problem');
-// Check sheet API call if it exists or not, then create one
 
 exports.CheckSheet = async (req, res) => {
   try {
@@ -69,7 +68,6 @@ exports.CreateSheet = async (req, res) => {
   }
 };
 
-// Sheet Deletion API call
 exports.DeleteSheet = async (req, res) => {
   try {
     let user = req.user.id;
@@ -103,7 +101,6 @@ exports.DeleteSheet = async (req, res) => {
   }
 };
 
-// Group creation API call
 exports.CreateGroup = async (req, res) => {
   try {
     const SheetData = await Sheet.findOne({ user: req.user.id});
@@ -126,7 +123,6 @@ exports.CreateGroup = async (req, res) => {
       });
     }
 
-    // Check if the group already exists
     const groupExists = SheetData.groups.some(group => group.groupName.toLowerCase() === groupName.toLowerCase());
 
     if (groupExists) {
@@ -137,7 +133,6 @@ exports.CreateGroup = async (req, res) => {
       });
     }
 
-    // Create and push the new group
     const newGroup = {
       groupName: groupName,
       problems: []
@@ -145,7 +140,6 @@ exports.CreateGroup = async (req, res) => {
 
     SheetData.groups.push(newGroup);
 
-    // Save the updated sheet
     const updatedSheet = await SheetData.save();
 
     if (updatedSheet) {
@@ -171,7 +165,6 @@ exports.CreateGroup = async (req, res) => {
   }
 };
 
-// Delete group API call
 exports.DeleteGroup = async (req, res) => {
   try {
     const SheetData = await Sheet.findOne({ user: req.user.id });
@@ -204,7 +197,6 @@ exports.DeleteGroup = async (req, res) => {
       });
     }
 
-    // Remove the group
     const updatedSheet = await SheetData.updateOne({
       $pull: {
         groups: { groupName: groupName }
@@ -236,23 +228,22 @@ exports.DeleteGroup = async (req, res) => {
 };
 
 
-// Show all groups API call
 exports.ShowAllGroups = async (req, res) => {
   try {
     let query={};
     query.user=req.user.id;
-    // Fetch the sheet data for the user
+   
     const SheetData = await Sheet.findOne(query);
-    // Handle case where the sheet is not found
+  
     if (!SheetData) {
-      // console.log("Sheet not found");
+  
       return res.status(400).json({
         message: "Sheet not found",
         success: false
       });
     }
 
-    // Map and return group names
+   
     const groupNames = SheetData.groups.map(group => group.groupName);
 
     return res.status(200).json({
@@ -270,7 +261,6 @@ exports.ShowAllGroups = async (req, res) => {
 };
 
 
-// Add problem to group API call 
 exports.AddProblemToGroup = async (req, res) => {
   try {
     const SheetData = await Sheet.findOne({
@@ -316,8 +306,6 @@ exports.AddProblemToGroup = async (req, res) => {
     if (!group[0].problems) {
       group[0].problems = [];
     }
-
-    // Check if the problem already exists in the group
     const problemExist = group[0].problems.filter(prob => prob.problem.equals(problem));
 
     if (problemExist.length > 0) {
@@ -355,13 +343,12 @@ exports.AddProblemToGroup = async (req, res) => {
 }
 
 
-// Remove problem from group API call
 exports.RemoveProblemFromGroup = async (req, res) => {
   try {
     const user = req.user.id;
     const {groupName, problemId } = req.body;
 
-    // Find the sheet by user
+ 
     const sheet = await Sheet.findOne({ user });
     if (!sheet) {
       return res.status(400).json({
@@ -370,7 +357,7 @@ exports.RemoveProblemFromGroup = async (req, res) => {
       });
     }
 
-    // Find the group by groupName
+  
     const group = sheet.groups.find(group => group.groupName === groupName);
     if (!group) {
       return res.status(400).json({
@@ -379,7 +366,7 @@ exports.RemoveProblemFromGroup = async (req, res) => {
       });
     }
 
-    // Find the problem in the group's problems array
+ 
     const problemIndex = group.problems.findIndex(prob => prob.problem.toString() === problemId);
     if (problemIndex === -1) {
       return res.status(400).json({
@@ -388,10 +375,10 @@ exports.RemoveProblemFromGroup = async (req, res) => {
       });
     }
 
-    // Remove the problem from the group's problems array
+
     group.problems.splice(problemIndex, 1);
 
-    // Save the updated sheet
+
     const updatedSheet = await sheet.save();
     if (updatedSheet) {
       return res.status(200).json({
@@ -414,14 +401,14 @@ exports.RemoveProblemFromGroup = async (req, res) => {
   }
 };
 
-// Show problems in group API call
+
 exports.ShowProblemsInGroup = async (req, res) => {
   try {
     let user = req.user.id;
     const groupName = req.query.groupName?.trim();
     console.log("User:", user);
     console.log("Group:", groupName);
-    // Validate input
+
     if (!user || !groupName) {
       return res.status(400).json({
         message: "User ID and group name are required",
@@ -429,7 +416,6 @@ exports.ShowProblemsInGroup = async (req, res) => {
       });
     }
 
-    // Find the sheet by user (assuming `Sheet` is a plain JavaScript object/array from a database)
     const sheet = await Sheet.findOne({ user });
 
     if (!sheet) {
@@ -439,7 +425,6 @@ exports.ShowProblemsInGroup = async (req, res) => {
       });
     }
 
-    // Find the group by groupName (case-insensitive)
     const group = sheet.groups.find(g => g.groupName.toLowerCase() === groupName.toLowerCase());
 
     if (!group) {
@@ -456,7 +441,7 @@ exports.ShowProblemsInGroup = async (req, res) => {
       });
     }
     const ProblemList=await Problem.find({_id:{$in:group.problems.map(prob=>prob.problem)}},{title:1,description:1,tags:1,difficulty:1});
-    // Return the problems in the group
+
     return res.status(200).json({
       message: "Problems fetched successfully",
       problems: ProblemList,

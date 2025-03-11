@@ -53,7 +53,7 @@ function App() {
         <Route path='profile' element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path='/problem-set' element={<ProblemSet />} />
         <Route path='/sheet' element={<Sheet />} />
-        <Route path='posts' element={<Post />}></Route>
+        <Route path='posts' element={ <ProtectedRoute > <Post />  </ProtectedRoute> }></Route>
       </Route>
       <Route path='/sign-in' element={<SigninCard />} />
       <Route path='/sign-up' element={<SignupCard />} />
