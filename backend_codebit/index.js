@@ -7,9 +7,11 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 const userRoutes = require('./routes/user');
 const {scheduleEmailTask}=require('./controllers/sendContestMail');
+ const job = require('./Utils/cron');
 // const path = require('path');
 dotenv.config();
  database.connect();
+job.start();
 app.use(cors({
     origin: "https://codebit-sr.netlify.app",
     credentials: true  
