@@ -55,8 +55,7 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
-
+    
 
     if (!email || !password) {
       return res.status(400).json({
@@ -99,7 +98,8 @@ exports.login = async (req, res) => {
       const options = {
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", 
+        // secure: process.env.NODE_ENV === "production", 
+        secure: false,
         sameSite: "none"
     };
     

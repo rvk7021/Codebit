@@ -18,8 +18,8 @@ const profileSlice = createSlice({
     },
     setLogout: (state) => {
       state.user = null;
-     
-      storage.removeItem('persist:root'); 
+     state.loading=false;
+      // storage.removeItem('persist:root'); 
     },
   },
 })

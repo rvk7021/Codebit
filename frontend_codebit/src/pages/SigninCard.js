@@ -35,7 +35,7 @@ export default function SigninCard() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
+     
         body: JSON.stringify(formData),
       });
 
@@ -46,7 +46,7 @@ export default function SigninCard() {
         dispatch(setLoading(false));
         return;
       }
-
+    
       const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getuser`, {
         method: "GET",
         credentials: "include",

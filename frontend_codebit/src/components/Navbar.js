@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { setLogout } from './Redux/Slices/ProfileSlice';
-
+import {persistor} from "../components/Redux/Store";
 const Navbar = () => {
   const {user}=useSelector(state=>state.profile)
   const dispatch = useDispatch();
@@ -13,6 +13,7 @@ const Navbar = () => {
     const response=await fetch(`${process.env.REACT_APP_BASE_URL}/logout`,{method:"POST",credentials:"include"});
     const data=await response.json();
     dispatch(setLogout());
+    persistor.purge();
     navigate('/sign-in');
   };
 
