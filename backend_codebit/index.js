@@ -11,7 +11,7 @@ const {scheduleEmailTask}=require('./controllers/sendContestMail');
 dotenv.config();
  database.connect();
 app.use(cors({
-    origin: "https://codebit-sr.netlify.app",
+    origin: "https://codebit-sr.netlify.app/",
     credentials: true  
 }));
 // const __dirname = path.resolve();
