@@ -138,37 +138,91 @@ exports.getUserSubmissions = async (req, res) => {
     }
 };
 
+// exports.runCode = async (req, res) => {
+//     try {
+//         const { title, code,test } = req.body;
+//         if (!title || !code ) {
+//             return res.status(400).json({ success: false, message: "All fields are mandatory" });
+//         }
+//         if (!test) {
+//             return res.status(404).json({ success: false, message: "Test cases not found" });
+//         }
+//         let results = [];
+//         for (let i = 0; i < test.length; i++) {
+//             const testCase =    test[i];
+//             const input = testCase.Input;
+//             const expectedOutput = testCase.ExpectedOutputs.trim();
+//             const response = await axios.post(`${process.env.EXECUTION_API_URL}/execute`, {
+//                 code,
+//                 input,
+//                 language:"cpp"
+//             });
+//             const actualOutput = response.data.output.trim();
+//             const passed = actualOutput === expectedOutput;
+//             results.push({
+//                 input,
+//                 expectedOutput,
+//                 actualOutput,
+//                 passed
+//             })
+//            }   
+//             return res.status(200).json({ success: true, message: "All Test Cases Run Successfully",results });
+//         } 
+//     catch (error) {
+//         return res.status(500).json({ success: false, message: error.message });
+//     }
+// };
+
 exports.runCode = async (req, res) => {
     try {
-        const { title, code,test } = req.body;
-        if (!title || !code ) {
+        const { title, code, test } = req.body;
+
+        if (!title || !code) {
             return res.status(400).json({ success: false, message: "All fields are mandatory" });
         }
+
         if (!test) {
             return res.status(404).json({ success: false, message: "Test cases not found" });
         }
-        let results = [];
-        for (let i = 0; i < test.length; i++) {
-            const testCase =    test[i];
-            const input = testCase.Input;
-            const expectedOutput = testCase.ExpectedOutputs.trim();
-            const response = await axios.post(`${process.env.EXECUTION_API_URL}/execute`, {
-                code,
-                input,
-                language:"cpp"
-            });
-            const actualOutput = response.data.output.trim();
-            const passed = actualOutput === expectedOutput;
-            results.push({
-                input,
-                expectedOutput,
-                actualOutput,
-                passed
-            })
-           }   
-            return res.status(200).json({ success: true, message: "All Test Cases Run Successfully",results });
-        } 
-    catch (error) {
+
+        // Execute all test cases in parallel
+        const executionPromises = test.map(async (testCase) => {
+            try {
+                const response = await axios.post(`${process.env.EXECUTION_API_URL}/execute`, {
+                    code,
+                    input: testCase.Input,
+                    language: "cpp",
+                });
+
+                const actualOutput = response.data.output.trim();
+                const expectedOutput = testCase.ExpectedOutputs.trim();
+                const passed = actualOutput === expectedOutput;
+
+                return {
+                    input: testCase.Input,
+                    expectedOutput,
+                    actualOutput,
+                    passed,
+                };
+            } catch (error) {
+                return {
+                    input: testCase.Input,
+                    expectedOutput: testCase.ExpectedOutputs.trim(),
+                    actualOutput: "Error",
+                    passed: false,
+                };
+            }
+        });
+
+        // Wait for all test cases to complete
+        const results = await Promise.allSettled(executionPromises);
+        const processedResults = results.map((r) =>
+            r.status === "fulfilled" ? r.value : { input: "Unknown", expectedOutput: "Unknown", actualOutput: "Error", passed: false }
+        );
+
+        return res.status(200).json({ success: true, message: "All Test Cases Run Successfully", results: processedResults });
+
+    } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
