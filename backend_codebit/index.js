@@ -13,7 +13,7 @@ dotenv.config();
  database.connect();
 job.start();
 app.use(cors({
-    origin: "https://frontend-codebit.onrender.com/",
+    origin: "https://codebit-sr.netlify.app/",
     credentials: true  
 }));
 // const __dirname = path.resolve();
